@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { worldFixture } from "@simulation-external/world-fixtures";
-import { renderWorldMarkdownNotes } from "@simulation-external/world-markdown";
 import {
   parseWorldExchange,
   serializeWorldExchange,
@@ -93,13 +92,10 @@ describe("portable World Exchange I/O", () => {
     expect(serializeWorldExchange(reorderedPeople)).not.toBe(first);
   });
 
-  it("round-trips the fixture and sends the same exchange to Markdown rendering", () => {
+  it("round-trips the fixture through the canonical schema validator", () => {
     const json = serializeWorldExchange(worldFixture);
     const loaded = parseWorldExchange(json);
     expect(loaded).toEqual(worldFixture);
-    expect(renderWorldMarkdownNotes(loaded)).toEqual(
-      renderWorldMarkdownNotes(worldFixture),
-    );
     expect(validateWorldExchange(loaded).valid).toBe(true);
   });
 

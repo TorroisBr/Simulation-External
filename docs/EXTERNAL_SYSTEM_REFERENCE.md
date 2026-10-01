@@ -2,32 +2,33 @@
 
 ## Purpose
 
-Simulation-External provides external tools and projection surfaces for the Simulation ecosystem. Its initial consumers are the Web World Explorer and an Obsidian plugin. The bundled validated fixture remains the demo source; both consumers can also load a portable World Exchange artifact.
+Simulation-External is the reusable external integration surface and tooling ecosystem for Simulation. Web Explorer and Obsidian are first-party reference consumers of that surface, not the definition of the surface itself. The bundled validated fixture remains the demo source; both consumers can also load a portable World Exchange artifact.
 
 ## Architectural relationship
 
 ```text
-Simulation Core
+Simulation canonical facts (future, coordinated source)
       ↓
-dedicated read/projection boundary (future, coordinated)
+approved read/projection adapter
       ↓
-World Exchange
+World Exchange v1 / portable JSON
       ↓
-Web / Obsidian / future tools
+Web / Obsidian / CLI / other consumers
 ```
 
 Simulation-External is separate from Simulation core and cannot redefine canonical Simulation architecture. World Exchange is not the Phase 12 (P12) persistence/save format. Public contracts expose stable domain concepts, not internal runtime or Store details. Unity is not part of the public external contract.
 
 ## Current structure
 
-- `packages/world-schema` owns renderer-agnostic World Exchange v1 types, ID/reference rules, indexes, and runtime validation.
-- `packages/world-io` parses and validates portable World Exchange JSON through `world-schema` and serializes deterministic `*.world.json` artifacts.
-- `packages/world-fixtures` provides the validated fictional world shared by apps and tests.
-- `packages/world-projection` prototypes a read-only candidate-facts adapter into World Exchange using External-owned mocks; it has no Simulation source implementation.
-- `packages/world-markdown` renders deterministic notes and safely merges generated content outside Obsidian.
-- `apps/web` presents either the fixture or a locally loaded portable exchange through the World Explorer.
-- `apps/obsidian-plugin` adapts the fixture or a manually imported portable exchange to an Obsidian vault and invokes the shared Markdown package.
-- Root tooling provides the pnpm workspace, strict TypeScript configuration, ESLint, Vitest, and Prettier.
+- **Contract:** `world-schema` owns World Exchange v1 types and validation.
+- **Core tooling:** `world-io` parses, validates, and serializes portable JSON.
+- **Adapter tooling:** `world-projection` is an External-only prototype; `world-markdown` is specialized Markdown/vault tooling.
+- **Supporting data:** `world-fixtures` provides demo/test data and is not required for portable-file consumers.
+- **Reference consumers:** `apps/web` and `apps/obsidian-plugin` exercise the surface; `examples/minimal-consumer` proves the smallest package path (`world-io` → `world-schema`).
+- Root tooling provides the pnpm workspace, TypeScript, ESLint, Vitest, and Prettier.
+
+See [External Platform Surface](EXTERNAL_PLATFORM_SURFACE.md) for public APIs,
+stability expectations, dependency rules, and the third-party consumer flow.
 
 ## World Exchange
 
@@ -51,6 +52,8 @@ The Web Explorer provides world overview, global search, entity lists and detail
 
 **Implemented:** World Exchange schema and validation; fixture world; Web consumer with local portable-file loading; deterministic Markdown transformation and sync safeguards; Obsidian fixture and portable-file import; deterministic `world-io` JSON parsing/serialization; External-only, fixture-backed projection boundary prototype with omission reporting and consumer compatibility tests.
 
+**Stage D.3 implemented:** package layers and public workspace entry points are classified; reference apps are explicitly consumers; consumer-pressure and stability rules are documented; a minimal independent consumer is part of workspace validation.
+
 **Not implemented:** a real Simulation exporter or Simulation-owned source contract; live IPC; runtime mutation; P12 save consumption; Mod API; live bidirectional synchronization.
 
 ## Simulation dependency boundaries
@@ -61,7 +64,7 @@ Authorized Simulation source studies use the ignored local `.references/Simulati
 
 ## Current roadmap stage
 
-Stages A (schema and fixtures), B (Web Explorer), and C (Obsidian export/sync prototype) are implemented. Stage D has a corrected read-only projection study, an External-only fixture-backed boundary prototype, a completed Stage D.1 contract pressure review, and implemented Stage D.2 portable World Exchange consumers. The v1 label optionality change and portable-file support do not supply Simulation-side World identity or a source contract, so no real exporter exists. Runtime exporter implementation requires explicit coordination and authorization. Stages E and F remain future work.
+Stages A (schema and fixtures), B (Web Explorer), and C (Obsidian export/sync prototype) are implemented. Stage D has a corrected read-only projection study, an External-only fixture-backed boundary prototype, a completed Stage D.1 contract pressure review, implemented Stage D.2 portable World Exchange consumers, and implemented Stage D.3 platform surface. These stages do not supply Simulation-side World identity or a source contract, so no real exporter exists. Runtime exporter implementation requires explicit coordination and authorization. Stages E and F remain future work.
 
 ## Validation
 

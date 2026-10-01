@@ -14,6 +14,14 @@
 - Do not add live Unity integration, IPC, sockets, an in-Simulation REST server, save loading/editing, runtime memory access, bidirectional live mutation, a Mod API, code injection, runtime plugin loading, authentication, multiplayer, cloud sync, or a production database unless separately authorized and architecturally coordinated.
 - For authorized Simulation source studies, use the ignored `.references/Simulation` mirror and its mirror workflow; do not use the sibling checkout. Never publish from the mirror, and preserve its local experiments and dirty state.
 
+## External platform boundary
+
+- Simulation-External is the reusable external integration surface and tooling ecosystem for Simulation. Web Explorer and Obsidian are first-party reference consumers, not the definition of the surface.
+- World Exchange and `world-schema` own the shared external data contract. Reference-consumer requests do not automatically become contract requirements; classify them as domain facts, reusable integration capability, presentation, or consumer-specific convenience before changing schema.
+- Reusable platform packages must not depend on Web Explorer or Obsidian. New consumers should reuse supported package-root APIs instead of creating parallel schema or parser implementations.
+- `world-projection` is an External-only prototype, not Simulation runtime authority. `world-markdown` is adapter tooling, not a core World Exchange dependency. Fixtures are demo/test data, not a required production source.
+- Internal Simulation runtime, Unity, P12, and P19 mechanics must not leak into public External contracts. World Exchange is interoperable as a file contract without a mandatory Simulation-External service.
+
 ## Working practices
 
 - Routine Git operations may be performed autonomously.

@@ -21,8 +21,10 @@ import {
   X,
 } from "lucide-react";
 import { worldFixture } from "@simulation-external/world-fixtures";
-import type { WorldExchange } from "@simulation-external/world-schema";
-import { parseWorldExchange } from "@simulation-external/world-io";
+import {
+  parseWorldExchange,
+  type WorldExchange,
+} from "@simulation-external/world-io";
 import {
   allEntities,
   asText,

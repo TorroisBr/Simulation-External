@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "world": {
+    "id": "world-minimal-example",
+    "name": "Minimal Consumer Example"
+  },
+  "people": [
+    {
+      "id": "person-example",
+      "name": "Example Person"
+    }
+  ],
+  "cities": [],
+  "locations": [],
+  "organizations": [],
+  "institutions": [],
+  "factions": [],
+  "items": [],
+  "historicalEvents": [],
+  "relationships": []
+}

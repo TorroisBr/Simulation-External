@@ -1,0 +1,18 @@
+{
+  "name": "@simulation-external/minimal-consumer-example",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A minimal independent consumer of portable World Exchange JSON.",
+  "scripts": {
+    "build": "pnpm --filter @simulation-external/world-io build && tsc -p tsconfig.json",
+    "typecheck": "pnpm --filter @simulation-external/world-io build && tsc -p tsconfig.json --noEmit",
+    "test": "pnpm --filter @simulation-external/world-io build && tsc -p tsconfig.json && node test/run.mjs"
+  },
+  "dependencies": {
+    "@simulation-external/world-io": "workspace:*"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

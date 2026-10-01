@@ -47,3 +47,11 @@ Domain entities expose convenient explicit ID fields for common navigation. The 
 ## Future evolution
 
 Keep v1 focused. Add new domain fields only when a consumer need is concrete; do not pre-model the entire Simulation domain. Do not silently reuse this contract for persistence or live commands. A future exporter must map internal data into this public projection under a separately reviewed integration contract.
+
+Web Explorer and Obsidian are reference consumers, not schema authorities. A
+consumer request must first be classified as a shared external domain fact,
+reusable integration capability, presentation concern, or consumer-specific
+convenience. Only approved cross-consumer domain facts should pressure this
+contract; presentation and consumer convenience stay out of mandatory schema.
+See [External Platform Surface](EXTERNAL_PLATFORM_SURFACE.md) for the review
+rule and compatibility layers.

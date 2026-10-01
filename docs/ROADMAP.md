@@ -26,6 +26,17 @@ artifact boundary usable by multiple consumers; it does not add a Simulation
 exporter, source contract, or live integration. See
 [Portable World Exchange](PORTABLE_WORLD_EXCHANGE.md).
 
+### Stage D.3 — External platform surface (implemented)
+
+Formalized Simulation-External as the reusable integration surface, with
+World Exchange as the language-neutral interoperability contract and Web and
+Obsidian as reference consumers. The package layers, dependency direction,
+public entry points, stability expectations, and consumer-pressure rule are
+documented. A minimal consumer package compiles and parses a portable sample
+using only `world-io` at runtime. This stage adds no Simulation exporter,
+service, transport, or package publication. See
+[External Platform Surface](EXTERNAL_PLATFORM_SURFACE.md).
+
 ## Stage E — controlled authoring/import (future)
 
 Requires separately agreed ownership, validation, conflict handling, authorization, and mutation contracts with Simulation core. No bidirectional live mutation is implemented by this roadmap foundation.

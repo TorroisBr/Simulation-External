@@ -92,6 +92,12 @@ importers:
         specifier: ^6.0.5
         version: 6.4.3
 
+  examples/minimal-consumer:
+    dependencies:
+      '@simulation-external/world-io':
+        specifier: workspace:*
+        version: link:../../packages/world-io
+
   packages/world-fixtures:
     dependencies:
       '@simulation-external/world-schema':
@@ -107,9 +113,6 @@ importers:
       '@simulation-external/world-fixtures':
         specifier: workspace:*
         version: link:../world-fixtures
-      '@simulation-external/world-markdown':
-        specifier: workspace:*
-        version: link:../world-markdown
 
   packages/world-markdown:
     dependencies:
