@@ -4,7 +4,9 @@
 
 Simulation-External hosts experimental tools and integration surfaces without coupling them to the Simulation runtime. It is not the Simulation core repository and is not an authority for canonical Simulation architecture. The initial implementation uses fixtures only.
 
-The shared boundary is a versioned, read-oriented World Exchange projection:
+The shared boundary is a versioned, read-oriented World Exchange projection.
+Stable IDs define entity identity; optional display names do not. Consumers
+render a fallback when an approved source has no label:
 
 ```text
 Simulation Core (future, separately coordinated exporter)
@@ -29,7 +31,7 @@ Dependency direction flows from consumers to shared packages. Shared packages mu
 
 ## External surface and future integration
 
-The first exchange is read-only and fixture-backed. `world-projection` demonstrates a fixture-backed adapter boundary and explicit omissions; its source contract is not Simulation-owned and it does not read Simulation. A future read-only exporter needs an explicit contract owned or reviewed with Simulation core before any runtime integration is attempted. It must transform selected public domain data into the exchange instead of exposing runtime objects. IPC, sockets, an in-process REST server, save loading/editing, memory inspection, and live mutation are outside this foundation.
+The first exchange is read-only and fixture-backed. `world-projection` demonstrates a fixture-backed adapter boundary and explicit omissions; its source contract is not Simulation-owned and it does not read Simulation. World Exchange v1 requires a World scope ID but permits absent display names on World and entity records; public domain type, event, and relationship fields remain required where they carry meaning. The Stage D.1 review documents the field decisions. A future read-only exporter needs an explicit contract owned or reviewed with Simulation core before any runtime integration is attempted. It must transform selected public domain data into the exchange instead of exposing runtime objects. IPC, sockets, an in-process REST server, save loading/editing, memory inspection, and live mutation are outside this foundation.
 
 ## Consumer architecture
 

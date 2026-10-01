@@ -3,6 +3,7 @@ import { worldFixture } from "@simulation-external/world-fixtures";
 import { renderWorldMarkdownNotes } from "@simulation-external/world-markdown";
 import {
   collectionEntries,
+  entityName,
   worldName,
 } from "../../../apps/web/src/lib/world.js";
 import { projectWorldExchange } from "../src/index.js";
@@ -40,5 +41,28 @@ describe("World Exchange consumer compatibility", () => {
     );
     expect(personNote?.content).toContain("### Related notes");
     expect(personNote?.content).not.toContain("actorKnowledgeByPerson");
+  });
+
+  it("renders stable identities when optional World Exchange labels are absent", () => {
+    const result = projectWorldExchange(
+      createConsumerCompatibilityMock({
+        includeDisplayNames: false,
+        includeWorldName: false,
+      }),
+    );
+    if (!result.exchange)
+      throw new Error("Expected a World ID to form the fixture exchange");
+
+    const person = collectionEntries(result.exchange, "people")[0]?.entity;
+    if (!person) throw new Error("Expected a projected Person");
+    expect(worldName(result.exchange)).toBe("Untitled world");
+    expect(entityName(person)).toBe(person.id);
+
+    const notes = renderWorldMarkdownNotes(result.exchange);
+    const personNote = notes.find(({ type }) => type === "person");
+    const worldNote = notes.find(({ type }) => type === "world");
+    expect(personNote?.path).toContain("People/id-");
+    expect(personNote?.content).toContain("Untitled person");
+    expect(worldNote?.content).toContain("Untitled world");
   });
 });

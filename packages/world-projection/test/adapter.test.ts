@@ -6,20 +6,18 @@ import {
 } from "./fixtures/mock-source.js";
 
 describe("read-only World Exchange projection prototype", () => {
-  it("does not fabricate a World identity or required presentation fields", () => {
+  it("does not fabricate a World identity or unsupported domain fields", () => {
     const result = projectWorldExchange(createCanonicalCapabilityMock());
 
     expect(result.exchange).toBeNull();
     expect(result.omissions).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ concept: "World", field: "id" }),
-        expect.objectContaining({ concept: "Person", field: "name" }),
         expect.objectContaining({ concept: "Person", field: "residenceId" }),
         expect.objectContaining({ concept: "Person", field: "locationId" }),
         expect.objectContaining({ concept: "City", field: "id" }),
         expect.objectContaining({ concept: "Location", field: "kind" }),
         expect.objectContaining({ concept: "Institution", field: "type" }),
-        expect.objectContaining({ concept: "Faction", field: "name" }),
         expect.objectContaining({
           concept: "Item",
           code: "item-instance-semantics-unresolved",
@@ -45,6 +43,33 @@ describe("read-only World Exchange projection prototype", () => {
       )?.message,
     ).toContain(
       "authored City definition is not a stable City instance identity",
+    );
+  });
+
+  it("projects stable identities when optional display labels are absent", () => {
+    const result = projectWorldExchange(
+      createConsumerCompatibilityMock({
+        includeDisplayNames: false,
+        includeWorldName: false,
+      }),
+    );
+    const exchange = result.exchange;
+    if (!exchange)
+      throw new Error("Expected the fixture World ID to form an exchange");
+
+    expect(exchange.world).toEqual({
+      id: toWorldExchangeId("World", "fixture-world:projection-consumer-check"),
+    });
+    expect(exchange.people.map(({ id, name }) => [id, name])).toEqual([
+      [toWorldExchangeId("Person", "fixture-person:lyra"), undefined],
+      [toWorldExchangeId("Person", "fixture-person:tomas"), undefined],
+    ]);
+    expect(exchange.cities[0]?.name).toBeUndefined();
+    expect(exchange.locations[0]?.name).toBeUndefined();
+    expect(exchange.factions[0]?.name).toBeUndefined();
+    expect(exchange.factions[0]?.memberIds).toHaveLength(2);
+    expect(result.omissions).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ field: "name" })]),
     );
   });
 

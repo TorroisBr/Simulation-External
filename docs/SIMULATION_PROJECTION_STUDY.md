@@ -48,12 +48,12 @@ These labels apply to each World Exchange entity mapping, not to complete-payloa
 | Location        | PARTIALLY_SUPPORTED             |
 | Organization    | DEFERRED                        |
 | Institution     | PARTIALLY_SUPPORTED             |
-| Faction         | PARTIALLY_SUPPORTED             |
+| Faction         | READY_TO_PROJECT                |
 | Item            | PARTIALLY_SUPPORTED             |
 | HistoricalEvent | PARTIALLY_SUPPORTED             |
 | Relationship    | PARTIALLY_SUPPORTED             |
 
-Faction has the strongest bounded mapping: canonical Faction records have a stable FactionId and current members are explicit PersonId-based affiliations. It remains partial because registration does not require a non-empty display name, while World Exchange requires Faction.name. This does not resolve World identity or create the common port. Per-entity evidence and all eight requested mapping dimensions are in [Simulation Entity Mapping](SIMULATION_ENTITY_MAPPING.md).
+Faction has a bounded mapping: canonical Faction records have a stable FactionId, and current members are explicit PersonId-based affiliations. Stage D.1 made display names optional because they are not identity or domain validity; a missing label no longer blocks a Faction row. The classification describes entity mapping only. World identity, the common read port, and reciprocal membership-field policy remain cross-cutting prerequisites. Per-entity evidence and all requested mapping dimensions are in [Simulation Entity Mapping](SIMULATION_ENTITY_MAPPING.md) and the [contract pressure review](WORLD_EXCHANGE_CONTRACT_PRESSURE_REVIEW.md).
 
 ## Proposed projection boundary
 
@@ -87,7 +87,7 @@ Specific v1 rules:
 - Person.locationId may reference a resolved LocationId only when a Person is At that Location. Hex-only positions and crossings are not World Exchange Locations by implication. InTransit needs an explicit rule.
 - Person.residenceId is a City relation, not current presence. Residence currently uses a runtime settlement identifier and needs a stable City mapping.
 - City.populationSummary may describe authoritative aggregate population only with agreed wording and as-of semantics. Never materialize aggregates as invented People.
-- Stable LocationId and its Hex anchor do not supply required World Exchange Location.name or kind. Do not synthesize either from City names, runtime graph labels, Hex IDs, Ruin names, or filenames.
+- Stable LocationId and its Hex anchor do not supply a public Location kind. Location name is optional in v1. Do not synthesize either a label or kind from City names, runtime graph labels, Hex IDs, Ruin names, or filenames.
 - Faction.memberIds may reflect active FactionAffiliationRecord facts. Ended affiliations are historical, not current membership.
 - Institution office incumbency is not general Institution membership.
 
@@ -131,7 +131,7 @@ This study defines read-only projection only. Future authoring/import is a separ
 1. Simulation architecture owners accept or revise the mapping and name the owning source and meaning for every field.
 2. Simulation defines World identity/lifecycle, including whether World means authored setting, configuration, initialized run, or another concept.
 3. Simulation approves stable instance identity and duplicate/rename/reuse/deletion rules for each projected Person and City not covered by a suitable semantic ID. It defines residence, Location, Hex, and transit mapping.
-4. Resolve missing required v1 facts: Location name/kind; Organization authority/type/membership; Institution type/membership/location; Item type and definition/instance/stack semantics. Schema additions such as quantity, coordinates, office, or snapshot-time fields require separate versioned review.
+4. Resolve missing required v1 facts: Location kind; Organization authority/type/membership; Institution type/membership/location; Item type and definition/instance/stack semantics. Display names are optional and must remain source-owned if supplied. Schema additions such as quantity, coordinates, office, birth representation, or snapshot-time fields require separate semantic review.
 5. Approve public Faction, Organization, Institution, and Relationship semantics, including direct fields versus general edges and current versus historical membership.
 6. Define retained HistoricalEvent sources, event IDs, retention/visibility, participants/locations, custom-calendar conversion, and as-of ordering/precision.
 7. Approve the read port's owner, repository/assembly, immutable result shape, coherent read point, failure/omission behavior, and contract versioning. It must not use or expose P12 snapshot structures.
@@ -141,10 +141,10 @@ This study defines read-only projection only. Future authoring/import is a separ
 ## Open architecture questions
 
 1. What Simulation concept does World represent, and which authority supplies its stable ID independent of configuration name, seed, Unity asset, authored profile, and runtime instance?
-2. Which Persons are in scope, including non-materialized/unnamed people? Who owns the public name and age time rule?
+2. Which Persons are in scope, including non-materialized/unnamed people? Who owns any public display name, and what is the age time rule?
 3. Will Simulation define a general City/Settlement ID? How does P14-A settlementSemanticId relate to City identity outside its bounded profile?
 4. How should City-to-Location anchors, Person residence, At, and InTransit be represented without conflation?
-5. What source supplies Location.name/kind, and are Hex, Location, Crossing, Site, and LocalTopology distinct public concepts?
+5. What source supplies Location.kind, and are Hex, Location, Crossing, Site, and LocalTopology distinct public concepts? A Location display name is optional.
 6. Is generic Organization intentionally deferred, and what future owner/type/member-role contract would make it projectable?
 7. What are public Institution type, membership, and location semantics? Does office representation need its own concept?
 8. Does Item mean definition, fungible stock, owned quantity, stack, or unique artifact? How do title, owner, custodian, location, and quantity relate?

@@ -12,13 +12,13 @@ export interface BaseEntity {
 }
 
 export interface WorldMetadata extends BaseEntity {
-  name: string;
+  name?: string;
   description?: string;
   era?: string;
 }
 
 export interface Person extends BaseEntity {
-  name: string;
+  name?: string;
   age?: number;
   gender?: string;
   occupation?: string;
@@ -32,7 +32,7 @@ export interface Person extends BaseEntity {
 }
 
 export interface City extends BaseEntity {
-  name: string;
+  name?: string;
   region?: string;
   populationSummary?: string;
   foundedYear?: number;
@@ -43,7 +43,7 @@ export interface City extends BaseEntity {
 }
 
 export interface Location extends BaseEntity {
-  name: string;
+  name?: string;
   kind: string;
   parentLocationId?: string;
   cityId?: string;
@@ -51,7 +51,7 @@ export interface Location extends BaseEntity {
 }
 
 export interface Organization extends BaseEntity {
-  name: string;
+  name?: string;
   type: string;
   cityId?: string;
   locationId?: string;
@@ -61,7 +61,7 @@ export interface Organization extends BaseEntity {
 }
 
 export interface Institution extends BaseEntity {
-  name: string;
+  name?: string;
   type: string;
   cityId?: string;
   locationId?: string;
@@ -70,7 +70,7 @@ export interface Institution extends BaseEntity {
 }
 
 export interface Faction extends BaseEntity {
-  name: string;
+  name?: string;
   ideology?: string;
   memberIds?: string[];
   cityIds?: string[];
@@ -79,7 +79,7 @@ export interface Faction extends BaseEntity {
 }
 
 export interface Item extends BaseEntity {
-  name: string;
+  name?: string;
   type: string;
   ownerId?: string;
   locationId?: string;
@@ -105,7 +105,7 @@ export interface Relationship extends BaseEntity {
   sinceYear?: number;
 }
 
-/** A portable snapshot with all references expressed as stable entity IDs. */
+/** A portable, world-scoped read projection with ID-based references. */
 export interface WorldExchange {
   schemaVersion: 1;
   world: WorldMetadata;
@@ -164,6 +164,7 @@ type RefCollection = CollectionName | "*";
 interface EntityDefinition {
   requiredStrings?: string[];
   optionalStrings?: string[];
+  optionalNonEmptyStrings?: string[];
   optionalNumbers?: string[];
   scalarRefs?: Record<string, RefCollection>;
   arrayRefs?: Record<string, RefCollection>;
@@ -183,7 +184,7 @@ const collectionNames: CollectionName[] = [
 
 const definitions: Record<CollectionName, EntityDefinition> = {
   people: {
-    requiredStrings: ["name"],
+    optionalNonEmptyStrings: ["name"],
     optionalStrings: ["gender", "occupation", "biography"],
     optionalNumbers: ["age"],
     scalarRefs: { residenceId: "cities", locationId: "locations" },
@@ -195,7 +196,7 @@ const definitions: Record<CollectionName, EntityDefinition> = {
     },
   },
   cities: {
-    requiredStrings: ["name"],
+    optionalNonEmptyStrings: ["name"],
     optionalStrings: ["region", "description", "populationSummary"],
     optionalNumbers: ["foundedYear"],
     scalarRefs: { locationId: "locations" },
@@ -205,24 +206,27 @@ const definitions: Record<CollectionName, EntityDefinition> = {
     },
   },
   locations: {
-    requiredStrings: ["name", "kind"],
+    requiredStrings: ["kind"],
+    optionalNonEmptyStrings: ["name"],
     optionalStrings: ["description"],
     scalarRefs: { parentLocationId: "locations", cityId: "cities" },
   },
   organizations: {
-    requiredStrings: ["name", "type"],
+    requiredStrings: ["type"],
+    optionalNonEmptyStrings: ["name"],
     optionalStrings: ["description"],
     scalarRefs: { cityId: "cities", locationId: "locations" },
     arrayRefs: { memberIds: "people", factionIds: "factions" },
   },
   institutions: {
-    requiredStrings: ["name", "type"],
+    requiredStrings: ["type"],
+    optionalNonEmptyStrings: ["name"],
     optionalStrings: ["description"],
     scalarRefs: { cityId: "cities", locationId: "locations" },
     arrayRefs: { memberIds: "people" },
   },
   factions: {
-    requiredStrings: ["name"],
+    optionalNonEmptyStrings: ["name"],
     optionalStrings: ["ideology", "description"],
     arrayRefs: {
       memberIds: "people",
@@ -231,7 +235,8 @@ const definitions: Record<CollectionName, EntityDefinition> = {
     },
   },
   items: {
-    requiredStrings: ["name", "type"],
+    requiredStrings: ["type"],
+    optionalNonEmptyStrings: ["name"],
     optionalStrings: ["description"],
     scalarRefs: { ownerId: "*", locationId: "locations" },
   },
@@ -336,7 +341,8 @@ export function validateWorldExchange(input: unknown): ValidationResult {
       world,
       "$.world",
       {
-        requiredStrings: ["id", "name"],
+        requiredStrings: ["id"],
+        optionalNonEmptyStrings: ["name"],
         optionalStrings: ["description", "era"],
       },
       issues,
@@ -494,6 +500,15 @@ function validateEntity(
   for (const field of definition.optionalStrings ?? []) {
     if (entity[field] !== undefined && typeof entity[field] !== "string") {
       addIssue(field, "invalid-type", "Expected a string when provided.");
+    }
+  }
+  for (const field of definition.optionalNonEmptyStrings ?? []) {
+    if (entity[field] !== undefined && !nonEmptyString(entity[field])) {
+      addIssue(
+        field,
+        "invalid-non-empty-string",
+        "Expected a non-empty string when provided.",
+      );
     }
   }
   for (const field of definition.optionalNumbers ?? []) {

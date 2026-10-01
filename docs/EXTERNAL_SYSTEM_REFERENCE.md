@@ -30,7 +30,7 @@ Simulation-External is separate from Simulation core and cannot redefine canonic
 
 ## World Exchange
 
-The current contract is schema version 1. Entity identity uses stable, non-empty IDs; references are explicit IDs and are validated against the exchange. Supported categories are World, Person, City, Location, Organization, Institution, Faction, Item, HistoricalEvent, and Relationship. Relationship endpoints may refer to any supported entity category. Runtime validation is applied to the fixture. Fixtures remain the integration source until an explicit projection contract exists.
+The current contract is schema version 1. Entity identity uses stable, non-empty IDs; references are explicit IDs and are validated against the exchange. World is a required scope object with a required ID; World and entity display names are optional and consumers provide fallbacks. Domain kinds/types, HistoricalEvent title/time, and Relationship endpoints/type remain required. Supported categories are World, Person, City, Location, Organization, Institution, Faction, Item, HistoricalEvent, and Relationship. Relationship endpoints may refer to any supported entity category. Runtime validation is applied to the fixture. Fixtures remain the integration source until an explicit projection contract exists.
 
 See [World Exchange v1](WORLD_EXCHANGE.md) for field and compatibility rules.
 
@@ -56,7 +56,7 @@ Future projection work needs an agreed domain authority and a read-only contract
 
 ## Current roadmap stage
 
-Stages A (schema and fixtures), B (Web Explorer), and C (Obsidian export/sync prototype) are implemented. Stage D has a corrected read-only projection study and an External-only fixture-backed boundary prototype; Simulation-side source authority and World identity remain unresolved, so no real exporter exists. Runtime exporter implementation requires explicit coordination and authorization. Stages E and F remain future work.
+Stages A (schema and fixtures), B (Web Explorer), and C (Obsidian export/sync prototype) are implemented. Stage D has a corrected read-only projection study, an External-only fixture-backed boundary prototype, and a completed Stage D.1 contract pressure review. The v1 label optionality change does not supply Simulation-side World identity or a source contract, so no real exporter exists. Runtime exporter implementation requires explicit coordination and authorization. Stages E and F remain future work.
 
 ## Validation
 
@@ -73,7 +73,7 @@ git diff --check
 
 ## Git and durability
 
-Make commits at meaningful durable boundaries. Do not force push or rewrite shared history, and do not modify the Simulation repository. At the last repository inspection for this reference, `main` and `origin/main` both pointed to `02cecd3` with a clean working tree. Re-check `git status -sb` and the remote before relying on later commits: a local commit alone is not remotely durable.
+Make commits at meaningful durable boundaries. Do not force push or rewrite shared history, and do not modify the Simulation repository. Re-check `git status -sb`, branch tracking, and the remote before relying on later commits: a local commit alone is not remotely durable.
 
 ## Architectural invariants
 

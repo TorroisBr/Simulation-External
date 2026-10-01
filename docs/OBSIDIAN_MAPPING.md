@@ -17,7 +17,7 @@ History/
 Relationships/
 ```
 
-The world overview is stored under `World/`; entity notes live in top-level folders such as `People/` and `Cities/`. Filenames are deterministic encodings of stable entity IDs, so a display-name change does not move a note or strand its GM notes. Human-readable names remain in headings and wikilink aliases. `simulation_id` is the canonical identity. If an ID-derived path is already occupied by a note claiming another ID, synchronization reports a conflict and leaves the file unchanged; it never merges notes based on matching names.
+The world overview is stored under `World/`; entity notes live in top-level folders such as `People/` and `Cities/`. Filenames are deterministic encodings of stable entity IDs, so a display-name change or omission does not move a note or strand its GM notes. Supplied names appear in headings and wikilink aliases; when a name is absent, the renderer uses a consumer fallback. `simulation_id` is the canonical identity. If an ID-derived path is already occupied by a note claiming another ID, synchronization reports a conflict and leaves the file unchanged; it never merges notes based on matching names.
 
 ## Frontmatter and links
 
@@ -29,4 +29,4 @@ The adapter owns its four Simulation metadata keys and the content between `<!--
 
 ## Renames and collisions
 
-Stable-ID filenames keep paths unchanged when display names change; synchronization updates the generated heading and links while retaining user sections. If multiple files claim the same ID, stop and report an ambiguity rather than choosing one. If an ID-derived path is occupied by a different ID, report the collision and leave the occupant untouched. Path cleanup must never delete user files automatically. A future multi-world vault mapping may add a world-ID namespace to these paths after its ownership behavior is specified.
+Stable-ID filenames keep paths unchanged when display names change or are absent; synchronization updates the generated heading and links using supplied labels or consumer fallbacks while retaining user sections. If multiple files claim the same ID, stop and report an ambiguity rather than choosing one. If an ID-derived path is occupied by a different ID, report the collision and leave the occupant untouched. Path cleanup must never delete user files automatically. A future multi-world vault mapping may add a world-ID namespace to these paths after its ownership behavior is specified.

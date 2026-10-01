@@ -82,18 +82,27 @@ export function createCanonicalCapabilityMock(): CanonicalCapabilityMock {
  * Markdown consumers accept the adapter's World Exchange output unchanged.
  */
 export function createConsumerCompatibilityMock(
-  options: { reverseRows?: boolean; personName?: string } = {},
+  options: {
+    reverseRows?: boolean;
+    personName?: string;
+    includeDisplayNames?: boolean;
+    includeWorldName?: boolean;
+  } = {},
 ): ConsumerCompatibilityMock {
+  const includeDisplayNames = options.includeDisplayNames !== false;
+  const includeWorldName = options.includeWorldName !== false;
   const people = [
     {
       sourceId: "fixture-person:lyra",
-      publicName: options.personName ?? "Lyra Venn",
+      ...(includeDisplayNames
+        ? { publicName: options.personName ?? "Lyra Venn" }
+        : {}),
       residenceCitySourceId: "fixture-city:aurora",
       currentLocationSourceId: "fixture-location:aurora",
     },
     {
       sourceId: "fixture-person:tomas",
-      publicName: "Tomas Rill",
+      ...(includeDisplayNames ? { publicName: "Tomas Rill" } : {}),
       residenceCitySourceId: "fixture-city:aurora",
       currentLocationSourceId: "fixture-location:aurora",
     },
@@ -102,25 +111,30 @@ export function createConsumerCompatibilityMock(
     {
       sourceId: "fixture-city:aurora",
       authoredDefinitionId: "fixture-city-definition:aurora",
-      publicName: "Aurora Quay",
+      ...(includeDisplayNames ? { publicName: "Aurora Quay" } : {}),
       locationSourceId: "fixture-location:aurora",
     },
   ];
   const locations = [
     {
       sourceId: "fixture-location:aurora",
-      publicName: "Aurora Quay",
+      ...(includeDisplayNames ? { publicName: "Aurora Quay" } : {}),
       publicKind: "fixture settlement anchor",
       citySourceId: "fixture-city:aurora",
     },
   ];
   const factions = [
-    { sourceId: "fixture-faction:harbor", publicName: "Harbor Compact" },
+    {
+      sourceId: "fixture-faction:harbor",
+      ...(includeDisplayNames ? { publicName: "Harbor Compact" } : {}),
+    },
   ];
   return {
     readWorldIdentity: () => ({
       sourceId: "fixture-world:projection-consumer-check",
-      name: "Projection Consumer Check Fixture",
+      ...(includeWorldName
+        ? { name: "Projection Consumer Check Fixture" }
+        : {}),
     }),
     readPeople: () => (options.reverseRows ? [...people].reverse() : people),
     readCities: () => (options.reverseRows ? [...cities].reverse() : cities),

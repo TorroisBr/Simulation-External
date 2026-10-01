@@ -121,8 +121,7 @@ export function projectWorldExchange(
           code: "reference-not-projectable",
           ...withSourceId(candidate.sourceId),
           field: "cityId",
-          message:
-            "The referenced City has no projectable stable identity and required name.",
+          message: "The referenced City has no projectable stable identity.",
         });
       }
     }
@@ -136,7 +135,7 @@ export function projectWorldExchange(
           ...withSourceId(candidate.sourceId),
           field: "parentLocationId",
           message:
-            "The referenced parent Location lacks required public name or kind data.",
+            "The referenced parent Location lacks its required public kind.",
         });
       }
     }
@@ -256,20 +255,9 @@ function projectWorld(
     });
     return null;
   }
-  if (!isPresent(candidate.name)) {
-    omissions.push({
-      concept: "World",
-      code: "required-field-unavailable",
-      sourceId: candidate.sourceId,
-      field: "name",
-      message:
-        "World Exchange v1 requires a source-owned non-empty World name.",
-    });
-    return null;
-  }
   return {
     id: toWorldExchangeId("World", candidate.sourceId),
-    name: candidate.name.trim(),
+    ...(isPresent(candidate.name) ? { name: candidate.name.trim() } : {}),
   };
 }
 
@@ -281,18 +269,12 @@ function projectPerson(
 ): Person | null {
   const id = projectedIdentity("Person", candidate.sourceId, omissions);
   if (!id) return null;
-  if (!isPresent(candidate.publicName)) {
-    omissions.push({
-      concept: "Person",
-      code: "required-field-unavailable",
-      ...withSourceId(candidate.sourceId),
-      field: "name",
-      message:
-        "World Exchange v1 requires a public Person name; none is supplied.",
-    });
-    return null;
-  }
-  const person: Person = { id, name: candidate.publicName.trim() };
+  const person: Person = {
+    id,
+    ...(isPresent(candidate.publicName)
+      ? { name: candidate.publicName.trim() }
+      : {}),
+  };
   if (candidate.residenceCitySourceId) {
     const city = cities.get(candidate.residenceCitySourceId);
     if (city) person.residenceId = city.id;
@@ -302,8 +284,7 @@ function projectPerson(
         code: "reference-not-projectable",
         ...withSourceId(candidate.sourceId),
         field: "residenceId",
-        message:
-          "The referenced City has no projectable stable identity and required name.",
+        message: "The referenced City has no projectable stable identity.",
       });
     }
   } else if (candidate.residenceIdentityUnavailable) {
@@ -325,8 +306,7 @@ function projectPerson(
         code: "reference-not-projectable",
         ...withSourceId(candidate.sourceId),
         field: "locationId",
-        message:
-          "The referenced Location lacks required public name or kind data.",
+        message: "The referenced Location lacks its required public kind.",
       });
     }
   }
@@ -349,19 +329,11 @@ function projectCity(
     });
     return null;
   }
-  if (!isPresent(candidate.publicName)) {
-    omissions.push({
-      concept: "City",
-      code: "required-field-unavailable",
-      sourceId: candidate.sourceId,
-      field: "name",
-      message: "World Exchange v1 requires a source-owned non-empty City name.",
-    });
-    return null;
-  }
   const city: City = {
     id: toWorldExchangeId("City", candidate.sourceId),
-    name: candidate.publicName.trim(),
+    ...(isPresent(candidate.publicName)
+      ? { name: candidate.publicName.trim() }
+      : {}),
   };
   if (candidate.locationSourceId) {
     const location = locations.get(candidate.locationSourceId);
@@ -372,8 +344,7 @@ function projectCity(
         code: "reference-not-projectable",
         sourceId: candidate.sourceId,
         field: "locationId",
-        message:
-          "The anchored Location lacks required public name or kind data.",
+        message: "The anchored Location lacks its required public kind.",
       });
     }
   }
@@ -386,16 +357,6 @@ function projectLocation(
 ): Location | null {
   const id = projectedIdentity("Location", candidate.sourceId, omissions);
   if (!id) return null;
-  if (!isPresent(candidate.publicName)) {
-    omissions.push({
-      concept: "Location",
-      code: "required-field-unavailable",
-      ...withSourceId(candidate.sourceId),
-      field: "name",
-      message:
-        "Stable Location identity exists, but World Exchange v1 requires a public name.",
-    });
-  }
   if (!isPresent(candidate.publicKind)) {
     omissions.push({
       concept: "Location",
@@ -405,13 +366,13 @@ function projectLocation(
       message: "World Exchange v1 requires an approved public Location kind.",
     });
   }
-  if (!isPresent(candidate.publicName) || !isPresent(candidate.publicKind)) {
-    return null;
-  }
+  if (!isPresent(candidate.publicKind)) return null;
   return {
     id,
-    name: candidate.publicName.trim(),
     kind: candidate.publicKind.trim(),
+    ...(isPresent(candidate.publicName)
+      ? { name: candidate.publicName.trim() }
+      : {}),
   };
 }
 
@@ -421,16 +382,6 @@ function projectInstitution(
 ): Institution | null {
   if (!projectedIdentity("Institution", candidate.sourceId, omissions))
     return null;
-  if (!isPresent(candidate.publicName)) {
-    omissions.push({
-      concept: "Institution",
-      code: "required-field-unavailable",
-      ...withSourceId(candidate.sourceId),
-      field: "name",
-      message: "World Exchange v1 requires a public Institution name.",
-    });
-    return null;
-  }
   if (!isPresent(candidate.publicType)) {
     omissions.push({
       concept: "Institution",
@@ -438,14 +389,16 @@ function projectInstitution(
       ...withSourceId(candidate.sourceId),
       field: "type",
       message:
-        "Institution identity and display name are known, but canonical records do not establish the required v1 type.",
+        "Canonical Institution records do not establish the required v1 type.",
     });
     return null;
   }
   return {
     id: toWorldExchangeId("Institution", candidate.sourceId!),
-    name: candidate.publicName.trim(),
     type: candidate.publicType.trim(),
+    ...(isPresent(candidate.publicName)
+      ? { name: candidate.publicName.trim() }
+      : {}),
   };
 }
 
@@ -455,18 +408,13 @@ function projectFaction(
 ): Faction | null {
   const id = projectedIdentity("Faction", candidate.sourceId, omissions);
   if (!id) return null;
-  if (!isPresent(candidate.publicName)) {
-    omissions.push({
-      concept: "Faction",
-      code: "required-field-unavailable",
-      ...withSourceId(candidate.sourceId),
-      field: "name",
-      message:
-        "Faction identity is known, but canonical registration does not guarantee the required v1 name.",
-    });
-    return null;
-  }
-  return { id, name: candidate.publicName.trim(), memberIds: [] };
+  return {
+    id,
+    ...(isPresent(candidate.publicName)
+      ? { name: candidate.publicName.trim() }
+      : {}),
+    memberIds: [],
+  };
 }
 
 function projectActiveAffiliations(
@@ -490,7 +438,7 @@ function projectActiveAffiliations(
         sourceId: affiliation.factionSourceId,
         field: "memberIds",
         message:
-          "An active affiliation endpoint is omitted because the Person or Faction cannot satisfy World Exchange v1 required fields.",
+          "An active affiliation endpoint is omitted because its Person or Faction identity is not projectable.",
       });
       continue;
     }

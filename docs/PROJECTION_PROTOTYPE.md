@@ -24,7 +24,7 @@ The package `@simulation-external/world-projection` owns the prototype adapter a
 
 This interface is not a proposed Simulation contract. Every source implementation would still require Simulation owner review. A future adapter should read only through a Simulation-approved domain read port and translate approved facts into this seam; it must not expose runtime objects or Stores.
 
-The canonical-capability mock leaves World identity unavailable and populates known gaps from the Stage D mapping. Therefore it produces no `WorldExchange`. HistoricalEvent is represented as an unavailable source capability rather than a fabricated event candidate. A separate consumer compatibility mock explicitly owns its `fixture-*` identities and presentation values. It exists only to prove that a complete source can pass through the mapper into the existing Web data helpers and Markdown renderer. None of those fixture values claims to be available from Simulation.
+The canonical-capability mock leaves World identity unavailable and populates known gaps from the Stage D mapping. Therefore it produces no `WorldExchange`. HistoricalEvent is represented as an unavailable source capability rather than a fabricated event candidate. A separate consumer compatibility mock explicitly owns its `fixture-*` identities and optional presentation values. It proves both labeled and unlabeled exchanges pass through the existing Web data helpers and Markdown renderer. None of those fixture values claims to be available from Simulation.
 
 ## Identity policy
 
@@ -42,18 +42,18 @@ A City authored definition ID is carried separately in the candidate type and is
 
 The status labels below are the corrected Stage D classifications. They describe Simulation concept readiness, not whether a fixture can be made to satisfy the v1 schema.
 
-| Concept         | Stage D status                    | Prototype behavior                                                                                                                                                                                                                                                             |
-| --------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| World           | `BLOCKED_BY_CURRENT_ARCHITECTURE` | Requires an explicit source-owned stable ID and name. The canonical-capability mock supplies neither ID nor an exchange. No profile, seed, config, or fixture identity is promoted into Simulation truth.                                                                      |
-| Person          | `PARTIALLY_SUPPORTED`             | Maps stable Person identity and a supplied non-empty public name. Current residence and Location references are included only when their referenced City/Location is also projectable. No age, biography, occupation, or authored fallback name is inferred.                   |
-| City            | `PARTIALLY_SUPPORTED`             | Maps only an explicitly supplied stable City instance identity and name. An authored definition identity alone is insufficient. A City-to-Location anchor is included only when both rows pass required-field checks.                                                          |
-| Location        | `PARTIALLY_SUPPORTED`             | Requires stable identity plus supplied non-empty public name and kind. A stable LocationId alone is omitted because v1 requires both presentation fields. City and parent references require projectable endpoints.                                                            |
-| Organization    | `DEFERRED`                        | No source method or mapper exists. `organizations` is empty, and the result records the canonical deferral. Legacy/local records, jobs, faction membership, officeholding, and presence do not synthesize Organization entities.                                               |
-| Institution     | `PARTIALLY_SUPPORTED`             | Requires stable Institution identity, supplied name, and supplied type. The canonical mock has identity and display name but no type, so it is omitted. Office incumbency is not treated as general membership.                                                                |
-| Faction         | `PARTIALLY_SUPPORTED`             | Requires stable identity and a supplied name. Active affiliation endpoints are included only when both Person and Faction map. They populate direct `Person.factionIds` and `Faction.memberIds`; no generic Relationship is emitted.                                           |
-| Item            | `PARTIALLY_SUPPORTED`             | Item definition candidates are always omitted because World Exchange v1 does not define whether Item means a catalog definition, unique object, or stack. Quantity is never copied from aggregate stock. Required `type` is also not established by the canonical Item source. |
-| HistoricalEvent | `PARTIALLY_SUPPORTED`             | No event reader is defined; the result records the missing generic source contract, stable ID, lifecycle/retention rule, and time mapping. Current state, choices, chronicles, snapshots, and diffs are not converted into events.                                             |
-| Relationship    | `PARTIALLY_SUPPORTED`             | No generic relationship rows are emitted. Active Faction affiliation uses direct v1 membership IDs. Parentage and office links wait for public type, direction, multiplicity, identity, and lifecycle decisions; directed appraisal/Knowledge remains perspective-specific.    |
+| Concept         | Stage D status                    | Prototype behavior                                                                                                                                                                                                                                                          |
+| --------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| World           | `BLOCKED_BY_CURRENT_ARCHITECTURE` | Requires an explicit source-owned stable ID; name is optional. The canonical-capability mock supplies no ID and therefore no exchange. No profile, seed, config, or fixture identity is promoted into Simulation truth.                                                     |
+| Person          | `PARTIALLY_SUPPORTED`             | Maps stable Person identity with an optional supplied public name. Current residence and Location references are included only when their referenced City/Location is projectable. Scope, age, biography, occupation, and location edge cases remain unresolved.            |
+| City            | `PARTIALLY_SUPPORTED`             | Maps only an explicitly supplied stable City instance identity; name is optional. An authored definition identity alone is insufficient. A City-to-Location anchor is included only when both IDs and required Location kind are available.                                 |
+| Location        | `PARTIALLY_SUPPORTED`             | Requires stable identity and public kind; name is optional. City and parent references require projectable endpoints and approved relation semantics.                                                                                                                       |
+| Organization    | `DEFERRED`                        | No source method or mapper exists. `organizations` is empty, and the result records the canonical deferral. Legacy/local records, jobs, faction membership, officeholding, and presence do not synthesize Organization entities.                                            |
+| Institution     | `PARTIALLY_SUPPORTED`             | Requires stable Institution identity and supplied type; name is optional. The canonical mock has identity but no type, so it is omitted. Office incumbency is not treated as general membership.                                                                            |
+| Faction         | `READY_TO_PROJECT`                | Maps stable identity with an optional name. Active affiliation endpoints are included only when both Person and Faction map. They populate direct `Person.factionIds` and `Faction.memberIds`; no generic Relationship is emitted.                                          |
+| Item            | `PARTIALLY_SUPPORTED`             | Item definition candidates are always omitted because World Exchange v1 does not define whether Item means a catalog definition, unique object, or stack. Quantity is never copied from aggregate stock. Name is optional; required `type` is not established.              |
+| HistoricalEvent | `PARTIALLY_SUPPORTED`             | No event reader is defined; the result records the missing generic source contract, stable ID, lifecycle/retention rule, and time mapping. Current state, choices, chronicles, snapshots, and diffs are not converted into events.                                          |
+| Relationship    | `PARTIALLY_SUPPORTED`             | No generic relationship rows are emitted. Active Faction affiliation uses direct v1 membership IDs. Parentage and office links wait for public type, direction, multiplicity, identity, and lifecycle decisions; directed appraisal/Knowledge remains perspective-specific. |
 
 The complete entity-by-entity authority, stable identity, safe facts, derivable relations, presentation-only data, Knowledge risks, gaps, and future adapter needs are documented in [Simulation Entity Mapping](SIMULATION_ENTITY_MAPPING.md).
 
@@ -73,10 +73,10 @@ An active Faction affiliation is a directed domain fact from Faction to Person. 
 
 ## Schema tensions and unsupported mappings
 
-- World Exchange v1 requires `world.id` and `world.name`. Current Simulation architecture has no canonical World identity or name contract. Without both, a valid v1 payload is impossible even if some entities are otherwise projectable.
-- Required display fields constrain projection. Person and City need names; Location needs name and kind; Institution needs name and type; Faction needs a name; Item needs name and type; HistoricalEvent needs title and time; Relationship needs endpoint IDs and type. If a source cannot guarantee a field, the adapter omits that entity or relationship.
+- World Exchange v1 requires a `world` scope object and `world.id`; `world.name` is optional. Current Simulation architecture has no canonical World identity, so a valid v1 payload is still impossible even if some entities are otherwise projectable.
+- Display names are optional for World, Person, City, Location, Organization, Institution, Faction, and Item. Required domain semantics remain: Location kind; Organization, Institution, and Item type; HistoricalEvent title and time; Relationship endpoint IDs and type. A source-owned label may be included, but no label is synthesized.
 - City has no generally approved stable instance identity. Authored City definition identity and bounded P14 settlement identity do not automatically identify every City instance.
-- Location identity is stable, but its general public name and kind taxonomy are not established.
+- Location identity is stable, but its required public kind taxonomy is not established.
 - Institution office and incumbent records do not define general members, and v1 has no Office entity.
 - Item definition, unique instance, stack, quantity, ownership, and market custody do not fit one proven v1 Item mapping.
 - Historical record identity and lifetime differ by domain; no common calendar mapping to v1 `year` or `occurredAt` exists.
@@ -104,8 +104,8 @@ A real exporter, after approval, would need to:
 Before a Simulation-backed exporter can be designed as an implementation task, all of these are required:
 
 1. Simulation maintainer approval of an owner-reviewed, read-only projection port and its source lifecycle/versioning.
-2. A canonical stable World ID, World name owner, World lifecycle, and as-of/read-consistency rule.
-3. Explicit stable identity and required-field policies for each concept claimed as exportable, including City instance crosswalk, Location name/kind, Institution type, Faction name, and Item meaning/type.
+2. A canonical stable World ID, World lifecycle, and as-of/read-consistency rule. A World display name is optional.
+3. Explicit stable identity and required-field policies for each concept claimed as exportable, including City instance crosswalk, Location kind, Institution type, and Item meaning/type. Optional labels must be source-owned when present.
 4. Approved source-to-World-Exchange ID namespace, encoding, uniqueness, and rename/lifecycle behavior.
 5. Relationship semantics for every projected edge: authority, direction, multiplicity, stable ID, and temporal validity. Direct fields must not be duplicated as generic edges without a decision.
 6. A selected source-owned retained-event subset with stable identity, retention, causal outcome, time/calendar, participant, Location, and visibility rules.
@@ -117,9 +117,9 @@ Before a Simulation-backed exporter can be designed as an implementation task, a
 
 - Which Simulation-owned record defines a World, and how does its stable ID survive profile changes and repeated runs?
 - What population of Persons is in projection scope, including dormant, unnamed, dead, or not-yet-materialized identities?
-- Which authored names are approved for individual Persons and City instances, and how do renames affect identity?
+- Which authored display names may be exposed for Persons and City instances, and how do renames affect the displayed value independently of identity?
 - How should a residence that currently resolves through a runtime settlement reference be joined to a durable public City identity?
-- What are the public name and kind authorities for Location, and how are Hex, Location, Crossing, Site, and local topology distinguished?
+- What is the public kind authority for Location, and how are Hex, Location, Crossing, Site, and local topology distinguished? A display name is optional.
 - Should World Exchange gain an Office entity, or should office/incumbency remain outside v1?
 - Does an Item represent a catalog definition or a unique held object, and where do type, quantity, ownership, and custody belong?
 - Which retained outcomes qualify as HistoricalEvent, and how are custom Simulation calendars represented without inventing Gregorian dates?

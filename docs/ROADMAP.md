@@ -14,7 +14,7 @@ Generate deterministic notes from the same exchange. Preserve user-owned vault c
 
 ## Stage D — read-only projection boundary (in progress)
 
-The corrected study and an External-only fixture-backed adapter prototype define and exercise the boundary, including explicit omissions and consumer compatibility. The prototype does not read Simulation or establish its source contract. A real exporter remains future work and requires coordination and an explicit integration contract with Simulation architecture owners. It should project approved domain data into World Exchange and must not load persistence files or expose internal runtime state.
+The corrected study and an External-only fixture-backed adapter prototype define and exercise the boundary, including explicit omissions and consumer compatibility. Stage D.1 has reviewed World Exchange field requirements: the World scope ID and stable entity IDs remain required, display names are optional, and domain type/event/relationship requirements remain in place. The prototype does not read Simulation or establish its source contract. A real exporter remains future work and requires coordination and an explicit integration contract with Simulation architecture owners. It should project approved domain data into World Exchange and must not load persistence files or expose internal runtime state.
 
 ## Stage E — controlled authoring/import (future)
 

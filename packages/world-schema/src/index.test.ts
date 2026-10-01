@@ -35,6 +35,54 @@ describe("world exchange schema", () => {
     if (result.valid) expect(result.value).toBe(exchange);
   });
 
+  it("accepts stable identities without optional display labels", () => {
+    const exchange = emptyExchange();
+    delete exchange.world.name;
+    exchange.people.push({ id: "person-one" });
+    exchange.cities.push({ id: "city-one" });
+    exchange.locations.push({ id: "location-one", kind: "landmark" });
+    exchange.organizations.push({ id: "organization-one", type: "guild" });
+    exchange.institutions.push({ id: "institution-one", type: "archive" });
+    exchange.factions.push({ id: "faction-one" });
+    exchange.items.push({ id: "item-one", type: "document" });
+    exchange.historicalEvents.push({
+      id: "event-one",
+      title: "A recorded event",
+      year: 12,
+    });
+    exchange.relationships.push({
+      id: "relationship-one",
+      sourceId: "person-one",
+      targetId: "faction-one",
+      type: "member-of",
+    });
+
+    expect(validateWorldExchange(exchange).valid).toBe(true);
+  });
+
+  it("rejects blank display labels when a label is supplied", () => {
+    const exchange = emptyExchange();
+    exchange.world.name = "  ";
+    exchange.people.push({ id: "person-one", name: "" });
+
+    const result = validateWorldExchange(exchange);
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: "$.world.name",
+            code: "invalid-non-empty-string",
+          }),
+          expect.objectContaining({
+            path: "$.people[0].name",
+            code: "invalid-non-empty-string",
+          }),
+        ]),
+      );
+    }
+  });
+
   it("reports schema, duplicate ID, and dangling reference errors", () => {
     const exchange = emptyExchange();
     (exchange as unknown as { schemaVersion: number }).schemaVersion = 2;

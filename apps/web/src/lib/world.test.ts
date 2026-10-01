@@ -3,6 +3,7 @@ import { worldFixture } from "@simulation-external/world-fixtures";
 import type { WorldExchange } from "@simulation-external/world-schema";
 import {
   collectionEntries,
+  entityName,
   entityId,
   eventYear,
   relatedEntities,
@@ -19,6 +20,19 @@ describe("World Explorer data helpers", () => {
     expect(
       collectionEntries(world, "cities").map(({ entity }) => entityId(entity)),
     ).toContain("city-aurora");
+  });
+
+  it("uses consumer labels when optional source display names are absent", () => {
+    const unlabeledExchange = structuredClone(world);
+    delete unlabeledExchange.world.name;
+    const person = unlabeledExchange.people.find(
+      ({ id }) => id === "person-lyra",
+    );
+    if (!person) throw new Error("Expected person-lyra in the fixture");
+    delete person.name;
+
+    expect(worldName(unlabeledExchange)).toBe("Untitled world");
+    expect(entityName(person)).toBe("person-lyra");
   });
 
   it("searches across entity collections by name and ID without case sensitivity", () => {
