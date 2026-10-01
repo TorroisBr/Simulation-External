@@ -506,6 +506,12 @@ const candidateWorldFixture: WorldExchange = {
       targetId: "person-oran",
       type: "political allies",
     },
+    {
+      id: "rel-navigators-aurora",
+      sourceId: "org-navigators",
+      targetId: "city-aurora",
+      type: "chartered port",
+    },
   ],
 };
 

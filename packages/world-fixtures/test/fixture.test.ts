@@ -29,6 +29,14 @@ describe("world fixture", () => {
     expect(index.organizations.get("org-navigators")?.memberIds).toHaveLength(
       3,
     );
+    const charterRelationship = worldFixture.relationships.find(
+      ({ id }) => id === "rel-navigators-aurora",
+    );
+    expect(charterRelationship?.sourceId).toBe("org-navigators");
+    expect(charterRelationship?.targetId).toBe("city-aurora");
+    expect(index.relationshipsByEntityId.get("city-aurora")).toContain(
+      charterRelationship,
+    );
     expect(
       index.relationshipsByEntityId.get("person-sora")?.length,
     ).toBeGreaterThan(0);
