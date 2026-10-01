@@ -1,145 +1,158 @@
-# Simulation → World Exchange Projection Study
+# Simulation to World Exchange Read Projection Study
 
-## Purpose and disposition
+## Purpose and decision
 
-This is a Stage D architecture study for a future, read-only projection from Simulation into World Exchange v1. It proposes a boundary and records the evidence and decisions needed before an exporter can be implemented. It does not authorize or implement a runtime exporter, a transport, persistence access, or authoring/import.
+This Stage D study defines a future read-only projection boundary from Simulation to World Exchange v1. It records canonical source evidence, entity mapping limits, identity rules, and the decisions required before an exporter can be built. It authorizes no runtime integration, transport, persistence reading, authoring, or import.
 
-No World Exchange entity is classified `READY_TO_PROJECT` at the inspected Simulation revision. Some Simulation concepts have useful source data, but stable instance identity, public semantics, or access through a dedicated read boundary remain unresolved. The entity-by-entity evidence is in [Simulation Entity Mapping](SIMULATION_ENTITY_MAPPING.md).
+The previous study used Simulation main at 002a55859544d1e26247c274e6d52590fa671a90 as its source baseline. That ref did not contain the promoted phase architecture and States listed below. Its claims that durable Person, Institution, Faction, and stable Location authorities were absent are superseded. They described that inspected main tree, not current canonical architecture. The previous study also treated a legacy Organization runtime as current authority; canonical architecture explicitly defers generic Organization. The mapping document corrects those conclusions and retains questions that still apply.
 
-## Inspected repository state
+Preferred flow: Simulation-owned domain authority → Simulation-approved read-only projection port → External World Exchange mapper and validator → Web, Obsidian, and future tools.
 
-| Repository          | Ref inspected                                                                    | State                                                                                                                            |
-| ------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Simulation-External | `main` at the starting inspection                                                | Clean, tracking `origin/main` before this study                                                                                  |
-| Simulation          | `main`, commit `002a55859544d1e26247c274e6d52590fa671a90`, same as `origin/main` | Tracked tree has no reported changes; status reports an untracked `.worktrees/` directory, which was left unopened and untouched |
+World Exchange remains the external read model. P12 remains a separate persistence and continuation effort. This study does not establish a Simulation exporter contract or declare a complete World Exchange payload ready.
 
-The Simulation commit is dated 2026-09-14 and titled `Add simulation runtime orchestration regressions`. Simulation was inspected read-only. The tracked Simulation Markdown inventory at this ref contains `AGENTS.md` only; no additional tracked architecture/domain design documents were available. Core source references below therefore name the path and relevant type/member at this exact commit.
+## Canonical Simulation evidence inspected
 
-External contract references: `docs/ARCHITECTURE.md`, `docs/WORLD_EXCHANGE.md`, `packages/world-schema/src/index.ts`, and `docs/ROADMAP.md`. World Exchange v1 requires a stable world ID, stable entity IDs unique across the payload, and explicit ID references. It is a read-oriented projection, not a persistence or transport format.
+The sibling repository is Simulation at E:/GitHub/GeneralSimulation/MainSimulation. Inspection was read-only. The source baseline uses the architecture ref and promoted phase State documents below, not Simulation main.
+
+| Evidence              | Canonical ref                            | Relevance                                                                                                                                |
+| --------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Architecture baseline | c285466c355103d3637ac165246591b72eb7bda0 | Domain ownership, truth/Knowledge, identity, Organization/Faction/Institution distinctions, geography, and event/history policy          |
+| Phase 5               | 3c3a5a7fa5bac8f301b98ec92307eadb19af25ff | PersonId and PersonStore; aggregate population; residence; genealogy; world-owned Institutions and Offices; mortality and continuity     |
+| Phase 6               | 77b139437407a92e52e08b40f885c8d1b606dee2 | Faction identity/affiliation; holder-scoped political Knowledge; generic Organization and C3 relationship projection explicitly deferred |
+| Phase 7               | 1f4651e99db2c357dd3be3c6b9284d104379f706 | Stable HexId/LocationId authority; battle outcome and downstream event distinction                                                       |
+| Phase 8               | 470667d37863384edadb3d93ef64d8004aff46a3 | Factual geography, City/Site anchors, Person position and actor Knowledge boundaries                                                     |
+| Phase 9               | 82396ae7ffaf407fda278928da456b06dc5394d4 | Authored bootstrap and one bounded authored Hex/Location source; no general World identity contract                                      |
+| Phase 10              | 252ad6b9a507f1c001c05a1e19c2546ebd0707a2 | Ruin/LocalTopology is a bounded Location consumer, not a replacement Location authority                                                  |
+| Phase 11              | 308e24d0744112e8f2b741521b8b3e4acb51ebbf | Actor choice uses PersonId; choice/intent is separate from outcome                                                                       |
+| Phase 12              | f538a096bf4b2558566518483bc60f0129718a3b | Boundary check only: P12-A waits on dependencies, P12-B is incomplete; no save model used as projection source                           |
+| Phase 14              | 4caecbbfb0464c965811402b3c11d8717605114a | Bounded material flow; settlement ownership, market custody, item definition and authored P14 identities                                 |
+| Phase 18              | 8ac2d7885ea1f00d544d88a64bf918a411934f7f | Logical time, causal order, and activity identity boundaries                                                                             |
+| Phase 20              | 7a81cc0ecbc511dd36c248ec62c7b20f7e477f53 | ActivityInstanceId, definition, and participant identities are distinct; activity is not automatically a HistoricalEvent                 |
+
+Reviewed source/document paths include Simulation docs/SIMULATION_ARCHITECTURE.md; relevant PHASE5 through PHASE20 State/design records; Person/PersonId.cs and Person/PersonRuntime.cs; Institution/InstitutionContracts.cs; FactionContracts.cs; CityData.cs and CityRuntime.cs; Data/ItemData.cs; SpatialAuthority.cs; and the P14-A, P11, P18, and P20 checkpoint records. P12 was read solely to confirm separation and current readiness. P12 snapshot, persistence, receipt, hydration, save, and continuation structures are not World Exchange sources.
+
+## Classification meanings and result
+
+These labels apply to each World Exchange entity mapping, not to complete-payload or exporter readiness.
+
+- READY_TO_PROJECT: Canonical Simulation authority has stable identity and required v1 factual fields for a bounded mapping. A shared port, ID encoding, and mapper remain future work.
+- PARTIALLY_SUPPORTED: Facts exist, but at least one required field, identity, lifecycle, or relationship meaning is missing or ambiguous.
+- BLOCKED_BY_CURRENT_ARCHITECTURE: A required concept/authority is absent or conflicts with an explicit current ownership boundary.
+- DEFERRED: Simulation architecture explicitly leaves the concept outside promoted scope.
+
+| Concept         | Classification                  |
+| --------------- | ------------------------------- |
+| World           | BLOCKED_BY_CURRENT_ARCHITECTURE |
+| Person          | PARTIALLY_SUPPORTED             |
+| City            | PARTIALLY_SUPPORTED             |
+| Location        | PARTIALLY_SUPPORTED             |
+| Organization    | DEFERRED                        |
+| Institution     | PARTIALLY_SUPPORTED             |
+| Faction         | PARTIALLY_SUPPORTED             |
+| Item            | PARTIALLY_SUPPORTED             |
+| HistoricalEvent | PARTIALLY_SUPPORTED             |
+| Relationship    | PARTIALLY_SUPPORTED             |
+
+Faction has the strongest bounded mapping: canonical Faction records have a stable FactionId and current members are explicit PersonId-based affiliations. It remains partial because registration does not require a non-empty display name, while World Exchange requires Faction.name. This does not resolve World identity or create the common port. Per-entity evidence and all eight requested mapping dimensions are in [Simulation Entity Mapping](SIMULATION_ENTITY_MAPPING.md).
 
 ## Proposed projection boundary
 
-```text
-Simulation-owned domain authority
-        ↓
-dedicated, read-only projection port
-        ↓
-approved immutable projection data
-        ↓
-World Exchange v1 mapping and validation
-        ↓
-Web / Obsidian / other consumers
-```
+Simulation should own or approve the read port because Simulation owns the semantics separating fact, actor Knowledge, and derived views. The port should read reviewed domain authorities at one documented coherent boundary and return purpose-built immutable projection data. It should not return public runtime classes, internal Stores, Unity objects, diagnostics snapshots, or persistence records.
 
-Simulation should own or explicitly review the read port because it defines which sources represent domain truth and when a consistent read can occur. The port should return a purpose-built, read-only projection shape; it must not publish Simulation runtime classes, Unity types, or Stores. An External-side mapping/validation component may translate that approved shape to `WorldExchange`, but must not reference the Simulation assembly. The location and ownership of those components, and how the two repositories share the versioned contract, remain open decisions.
+External should own a separate mapper from that approved input to World Exchange v1 and validate the result with @simulation-external/world-schema. The mapper must not reference the Simulation assembly or make domain decisions. It may omit unsupported optional values and must fail closed on missing required facts, ambiguous IDs, duplicates, and dangling references.
 
-The export is a point-in-time view of selected current facts plus a separately governed set of retained historical facts. It should read one coherent state at a defined simulation boundary. It must not mutate the world, start or advance a simulation, restore state, or read a P12 save. Transport and invocation are separate future decisions; no IPC, REST, sockets, or other live connection is proposed here.
+Assembly/repository ownership, contract sharing, and invocation point remain open. Invocation and transport are separate decisions. No IPC, REST, socket, or in-Simulation server is proposed. A read must not start or advance Simulation, mutate domain state, hydrate state, or load a save.
 
-## Identity mapping strategy
+A future input needs an explicitly selected World identity and coherent as-of boundary. World Exchange v1 has no snapshot timestamp. Do not hide snapshot time, source Stores, runtime classes, or continuation state in metadata. A future envelope or schema change needs separate review.
 
-1. Simulation must define a stable world identity for the world represented by the export. `SimulationConfigData.simulationName` is a display label, not that identity. The open question is whether a world means a configuration, a runtime instance, or a larger authored setting.
-2. Give every projected entity a stable, type-scoped public ID in the world namespace. A future encoding could combine a stable world key, an entity kind, and a Simulation-owned stable entity/instance key. The encoding and escaping rules require review; this study does not establish a Simulation ID contract.
-3. Treat current `DefinitionId` properties (`NpcData`, `CityData`, `ItemData`, and `OrganizationData`) as candidate authored identifiers only. Their uniqueness, lifecycle, reuse, and cross-kind namespace rules are not established as a public integration contract. Repeated `NpcData` or `CityData` definitions can produce multiple runtimes, so a definition ID alone cannot identify every runtime Person or City.
-4. Never use `RuntimeIdAllocator` values as cross-run IDs. It starts its sequences at one, and `TesteSimulacao.InitializeSimulation` creates a new allocator for each initialization. Runtime IDs, array positions, Unity asset GUIDs, asset/file names, display names, and filenames are not external identity.
-5. Events and relationships also need identities that survive repeated exports. Current event IDs are sequence-allocated runtime IDs. A relationship ID cannot be inferred until its public type, direction, multiplicity, and lifecycle are defined.
-6. Before writing any reference, the adapter must resolve it through the approved identity map and validate that the target is present in the same World Exchange payload. A missing or ambiguous source identity must fail or omit the entity/reference under a documented policy; it must never silently substitute a name.
+### ID mapping strategy
+
+Simulation semantic IDs and World Exchange string IDs are separate contracts. A mapper should use an explicit table keyed by entity kind and source identity, then encode a non-empty World Exchange ID unique across all entities in one payload. Type prefixes plus a defined escaping or length-prefix rule are candidates, not approved Simulation ID semantics.
+
+Use canonical semantic IDs where available: PersonId, InstitutionId, FactionId, LocationId, and ItemData.DefinitionId only if the chosen World Exchange meaning is an item definition. Do not substitute names, filenames, Unity asset GUIDs, runtime allocator values, array positions, or consumer paths.
+
+CityData.DefinitionId identifies authored City data, not a generally approved City instance. P14-A settlementSemanticId is for its bounded material-flow owner; it is not evidence of a universal CityId. Person residence currently refers through a runtime settlement identifier and needs an approved City crosswalk. Domain event and generic relationship IDs need their own lifecycle rules. If a source lacks stable semantic identity, omit or block it; do not hash names or invent source IDs.
+
+Simulation must provide a stable World ID. A configuration label, authored profile name, seed, Unity asset identity, scenario, or runtime instance is not interchangeable with that identity.
 
 ## Factual-world-truth policy
 
-- Project only fields whose source is the Simulation-owned authoritative world state at the export cut. Separate authored definitions from mutable current state and label their meaning accordingly.
-- A current Simulation fact is not a fact that every NPC knows. Never turn what an NPC observed, inferred, received from another NPC, or believes into a global world fact.
-- Do not infer unmodeled facts from display helpers, action text, logs, decision utility, default values, filenames, or consumer presentation.
-- `NpcRuntime.CurrentCity` represents current city presence when set; it is not a permanent residence field. It is cleared during travel. Do not populate `Person.residenceId` from it. A current `locationId` also requires agreement that a city transit node is a public Location entity and a rule for people in transit.
-- `CityRuntime.CurrentPopulation` is an aggregate Simulation population. Do not expand it into fictional Person records. World Exchange v1 has only a text `populationSummary`, so a clearly labeled abstract aggregate needs contract agreement before projection.
-- Simulation statuses, action state, utility, money, inventories, trade plans, travel counters, justice internals, and scheduler directives are internal/current mechanics unless a specific public domain projection is approved. Their presence in a runtime class does not make them World Exchange facts.
-- Do not copy private runtime implementation, stores, Unity serialization, P12 fields, or internal object graphs into `metadata`. World Exchange metadata is not an implementation escape hatch.
+Project only facts from their owning Simulation authority at the selected read boundary. Preserve distinctions among authored definitions, current state, population aggregates, and retained history. Current membership, position, residence, and authority must come from their respective current sources.
+
+An actor's observation, inference, received information, political position, or appraisal is not global truth. Execution may revalidate truth after a decision; decision evidence does not replace that truth. UI read models, logs, chronicle prose, action text, utility scores, diagnostics, and fallback strings do not become facts by being readable.
+
+Specific v1 rules:
+
+- Person.age is derived from factual birth day, the Simulation calendar, and an agreed as-of day.
+- Person.locationId may reference a resolved LocationId only when a Person is At that Location. Hex-only positions and crossings are not World Exchange Locations by implication. InTransit needs an explicit rule.
+- Person.residenceId is a City relation, not current presence. Residence currently uses a runtime settlement identifier and needs a stable City mapping.
+- City.populationSummary may describe authoritative aggregate population only with agreed wording and as-of semantics. Never materialize aggregates as invented People.
+- Stable LocationId and its Hex anchor do not supply required World Exchange Location.name or kind. Do not synthesize either from City names, runtime graph labels, Hex IDs, Ruin names, or filenames.
+- Faction.memberIds may reflect active FactionAffiliationRecord facts. Ended affiliations are historical, not current membership.
+- Institution office incumbency is not general Institution membership.
+
+World Exchange metadata is not an escape hatch for Simulation internals.
 
 ## Knowledge projection policy
 
-World Exchange v1 has no actor-scoped Knowledge concept or observer/provenance model. Therefore the default policy is to omit Knowledge entirely from the factual World Exchange payload.
+World Exchange v1 has no actor-scoped Knowledge, observer, belief, provenance, or freshness contract. Omit Knowledge from the factual payload.
 
-This specifically excludes `SpatialKnowledgeRuntime.KnownLocationRuntimeIds` and `KnownRouteRuntimeIds`, and `CommercialKnowledgeRuntime` observations. Commercial observations have an observing/receiving NPC, observation and receipt days, freshness, and sources such as direct observation, initial scenario knowledge, or sharing by another NPC. They may be stale or second-hand. They describe what one actor can use, not the current market as a whole. If a future product needs this material, it needs a separately reviewed actor-scoped contract with provenance and time semantics; it must not be projected into factual Location, City, Item, or Relationship fields.
+This excludes spatially known Locations/routes, commercial observations, and political observations held by Person, Institution, or Faction. Political Knowledge is independently holder-scoped and does not flow to Faction members. A merchant observation is not current global stock or price.
 
-`NpcRelationRuntime` is not the same data structure as the Knowledge stores, but its directed affinity/trust/fear values are source-NPC-specific assessments. They must not be labeled as objective social ties without an explicit Simulation and schema decision.
+NpcRelationRuntime affinity/trust/fear values are directed actor assessments, not objective reciprocal relationships. SocialReaction, support, recognition, interpretation, and legitimacy likewise must not be flattened into factual Relationship or Faction fields. A future need for perspective data requires a separate actor-scoped, provenance-aware contract.
 
-## Current state and historical records
+## Current state and HistoricalEvent strategy
 
-The current state projection and historical-event projection must have distinct source rules:
+Current state and historical evidence have distinct source and inclusion rules. Do not reconstruct history from current truth, and do not use a domain event as the source of current truth.
 
-- Current state comes from approved domain authorities at one read cut. It must not be reconstructed from a log, an NPC chronicle, or a save snapshot.
-- `DomainEvent` instances represent recorded outcomes such as travel, arrival, arrest, escape, and travel-party start/arrival. `DomainEventStore` holds events for the current runtime session. `HistoryStore` is narrower: `HistoryPolicy.ShouldRetain` currently retains only `NpcEscapedEvent`. Both stores are initialized during `TesteSimulacao.InitializeSimulation`; they do not establish cross-run durable history.
-- `NpcDecisionRecord` records that an action was chosen; it is not proof that the action succeeded. `NpcChronicleService` deliberately combines decisions and domain events for a person-oriented view, while `NpcChronicleFormatter` produces perspective-sensitive presentation text. Neither is a direct HistoricalEvent source.
-- If Simulation approves selected domain events for World Exchange, the adapter needs stable event identity, an explicit retained-history scope, approved event titles/types and participants, and a calendar mapping. `DomainEvent.AbsoluteDay` can be interpreted through `CalendarDefinition.GetDate`, but World Exchange v1 does not define how a custom Simulation calendar maps to `year` or `occurredAt`. Do not format a Gregorian date or export a runtime `EventId` by assumption.
-- Never synthesize historical events from current status, current location, an action decision, or a derived UI timeline.
+Simulation has bounded authoritative histories: Phase 5 institutional tenure and explicit property/estate continuity; Phase 6 claim/recognition and affiliation records; Phase 7 terminal Battle outcome/provenance and downstream BattleResolved evidence. These are domain-owned records, not one universal public event stream. DomainEventStore and HistoryStore have different lifetime and retention rules. A current-runtime event sequence is not automatically cross-run public history. No general HistoricalEventId contract was found.
 
-## Mapping summary
+Only separately approved mappings from retained outcome/history records may become World Exchange HistoricalEvents. Actor choices, directives, activities, proposals, chronicle views, and diagnostics do not prove an outcome. ActivityInstanceId is an activity identity, not an event identity. Do not synthesize events from current death/status/location or decisions.
 
-| World Exchange concept | Classification                    | Main reason                                                                                                                    |
-| ---------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| World                  | `BLOCKED_BY_CURRENT_ARCHITECTURE` | No stable World ID or agreed distinction between configured scenario and world                                                 |
-| Person                 | `PARTIALLY_SUPPORTED`             | Authored person fields and current runtime exist; a stable ID per instantiated person and residence/location semantics do not  |
-| City                   | `PARTIALLY_SUPPORTED`             | Authored name and runtime population/location exist; runtime instance identity and public Location relation are unresolved     |
-| Location               | `BLOCKED_BY_CURRENT_ARCHITECTURE` | Current spatial node is an opaque runtime route node without stable identity or authored name/kind                             |
-| Organization           | `PARTIALLY_SUPPORTED`             | Definition/name and membership types exist, but required type and active world wiring are missing                              |
-| Institution            | `DEFERRED`                        | No corresponding Simulation domain/configuration concept was found at the inspected ref                                        |
-| Faction                | `DEFERRED`                        | No corresponding Simulation domain/configuration concept was found at the inspected ref                                        |
-| Item                   | `BLOCKED_BY_CURRENT_ARCHITECTURE` | Simulation models item definitions and aggregated quantities; World Exchange Item identity/type/owner semantics are unresolved |
-| HistoricalEvent        | `PARTIALLY_SUPPORTED`             | Some outcome event records exist, but retention is runtime-local/narrow and event identity/time projection is unresolved       |
-| Relationship           | `BLOCKED_BY_CURRENT_ARCHITECTURE` | Existing NPC relation values are directed actor assessments, while public relationship semantics and IDs are undefined         |
+World Exchange v1 requires a title and either a finite year or non-empty occurredAt. Simulation uses absolute days and custom calendars, with finer logical time. The mapping needs an explicit calendar/version rule and precision. Do not treat an absolute day as Gregorian or a logical instant as occurredAt by assumption. Event scope, retention, identity across restart, participants, visibility, order, and time precision remain open.
 
-No category is ready for implementation without the cross-cutting identity and read-boundary decisions below. This status does not claim that Simulation concepts can never map to World Exchange.
+## World Exchange and P12 persistence
 
-## Unsupported and ambiguous areas
+World Exchange is a read-oriented external projection. P12 is a separate Simulation persistence/continuation architecture with its own completeness and lifecycle gates. The P12 State at f538a096bf4b2558566518483bc60f0129718a3 records P12-A waiting and P12-B incomplete. This was consulted only to confirm the boundary and not as a contract to copy.
 
-- Stable world identity; stable per-instance Person/City IDs; identity lifecycle, aliasing, deletion, and duplicate-definition behavior.
-- A public read port and snapshot consistency point. `SimulationRuntime` exposes city and NPC runtime lists, while the scene-facing `TesteSimulacao` owns other services/stores. No single public projection contract covers the whole world.
-- Whether named NPCs are the only projected Persons. Simulation instructions say common city population is abstract and only relevant NPCs have complete `NpcRuntime` state.
-- Whether a city’s spatial graph node is a public `Location`, and how exact position, residence, in-transit state, routes, and city containment differ.
-- A type vocabulary for Organization; the current organization membership role is not represented by `WorldExchange.Organization.memberIds`.
-- Institution and Faction domain sources.
-- Whether World Exchange `Item` means an item definition, a fungible stack/quantity, or an individual artifact, and how owner/location/quantity are represented.
-- Which DomainEvents are durable public history, how event IDs survive restarts, and how custom calendar dates map to World Exchange event time.
-- Whether Relationship is an objective social/political edge, an actor’s directed evaluation, or a generic connection. Current schema has no observer or affinity/trust/fear values.
-- Whether the payload needs an explicit `asOf`/simulation day. World Exchange v1 currently has no top-level snapshot time; this cannot be hidden in undocumented metadata.
-- How schema versions are shared between repositories and which side owns conformance tests for the producer boundary.
+The future projection reads approved domain authority through its own port. It must not consume P12 snapshots, persistence receipts, mutation epochs, hydration internals, save formats, or continuation state. Diagnostic snapshots and canonical writers also are not an exporter contract.
+
+This study defines read-only projection only. Future authoring/import is a separate direction requiring its own Simulation-approved write contract, field ownership, validation, conflict policy, and authorization.
 
 ## Future adapter responsibilities
 
-Once the prerequisites are approved, a dedicated adapter should:
-
-1. Read only from the reviewed Simulation projection port at its documented consistency point.
-2. Convert approved authored definitions and current domain state into World Exchange public values; never expose Simulation or Unity types.
-3. Apply stable, type-scoped IDs and remap every entity/event/reference consistently; reject duplicate IDs and dangling references.
-4. Keep current facts, retained outcome events, and actor Knowledge separate. Apply explicit omission rules to unsupported, private, stale, or ambiguous fields.
-5. Produce only fields that World Exchange v1 defines. Request a separately reviewed schema revision for missing public concepts; do not stuff them into `metadata`.
-6. Validate the payload using the shared `@simulation-external/world-schema` contract and make a deterministic output for the same approved source state.
-7. Have no mutation, persistence loading, P12 dependency, or consumer-specific rendering responsibility. Invocation and transport remain outside this study.
+1. Simulation's port selects a coherent source cut and returns only approved immutable facts, semantic identities, and documented time context.
+2. The External mapper converts those facts into defined v1 fields, applies the agreed public ID map, omits unsupported optional facts, resolves references, and validates the payload.
+3. The adapter preserves ownership/lifecycle, keeps Knowledge separate, maps only approved retained history, avoids redundant graph edges when direct v1 membership fields apply, and produces deterministic output for equivalent source states.
+4. It exposes no Simulation runtime class, Store, Unity type, persistence format, or consumer presentation. It has no mutation or authoring responsibility.
 
 ## Exact prerequisites for a real exporter
 
-1. Simulation architecture owners accept or revise this study and identify the domain owner for every exported concept.
-2. Simulation defines a durable World ID and durable IDs for each projected instance, including duplicate-definition, rename, reuse, deletion, and migration rules. It defines event identity and, if public relationships are supported, relationship identity too.
-3. Simulation defines which data is authoritative current truth, what is only actor Knowledge, what is presentation/derived state, and which event types/retention window are public.
-4. Simulation owners approve a read-only projection port, its assembly/repository ownership, and a coherent snapshot boundary. The port returns approved projection data rather than runtime classes, Stores, or Unity objects.
-5. Simulation and External owners agree the exact World Exchange version, field meanings, ID encoding, missing-data behavior, date/calendar mapping, population summary semantics, and payload as-of semantics. Any necessary schema changes must be separately reviewed and versioned.
-6. Resolve the World/Scenario, Person/Residence, City/Location/Route, Organization type/roles, Item definition/stack/instance, HistoricalEvent retention/time, and Relationship perspective questions in the mapping document. Keep Institutions/Factions deferred until Simulation defines their domain sources.
-7. Provide representative approved source states and producer-side validation covering stable repeat exports, duplicate and missing IDs, dangling references, event inclusion, actor Knowledge exclusion, and proof that export does not mutate state.
-8. Choose invocation and transport only after the boundary is agreed. This prerequisite does not authorize IPC, REST, sockets, save reading, or live mutation.
+1. Simulation architecture owners accept or revise the mapping and name the owning source and meaning for every field.
+2. Simulation defines World identity/lifecycle, including whether World means authored setting, configuration, initialized run, or another concept.
+3. Simulation approves stable instance identity and duplicate/rename/reuse/deletion rules for each projected Person and City not covered by a suitable semantic ID. It defines residence, Location, Hex, and transit mapping.
+4. Resolve missing required v1 facts: Location name/kind; Organization authority/type/membership; Institution type/membership/location; Item type and definition/instance/stack semantics. Schema additions such as quantity, coordinates, office, or snapshot-time fields require separate versioned review.
+5. Approve public Faction, Organization, Institution, and Relationship semantics, including direct fields versus general edges and current versus historical membership.
+6. Define retained HistoricalEvent sources, event IDs, retention/visibility, participants/locations, custom-calendar conversion, and as-of ordering/precision.
+7. Approve the read port's owner, repository/assembly, immutable result shape, coherent read point, failure/omission behavior, and contract versioning. It must not use or expose P12 snapshot structures.
+8. Agree producer conformance checks for repeated-export ID stability, missing/duplicate identity, dangling refs, Knowledge exclusion, history inclusion, consistent as-of facts, and read-only/no-advance behavior.
+9. Select invocation only after the contract is agreed. Transport is a separate decision. This study authorizes no IPC, REST, sockets, server, persistence access, or live mutation.
 
 ## Open architecture questions
 
-1. Is an exported World a `SimulationConfigData`, one initialized runtime based on it, or a broader authored world that can have multiple scenarios?
-2. Where should the read port and serializer live, and how will Simulation consume or validate the separately owned World Exchange v1 schema without importing consumer packages or duplicating types?
-3. Does Simulation intend `NpcData.DefinitionId` and `CityData.DefinitionId` to identify authored definitions only, or durable people/cities? What additional instance IDs are needed when a definition is instantiated more than once?
-4. Which NPCs qualify as World Exchange Persons, and should a traveling NPC have an omitted location, a route location, or another explicitly modeled state?
-5. Is the current spatial network a geographic/location model or only a travel graph? If both, what public identifiers and authored names/kinds distinguish those uses?
-6. Should abstract current population be exposed as a summary, and what wording/precision prevents consumers treating it as individually represented citizens?
-7. What are the public Organization type vocabulary and membership semantics? Are leader/member roles public facts, and should Simulation configure Organization instances in the world runtime?
-8. Should Item represent catalog definitions, fungible stock, personal holdings, or unique artifacts? Does World Exchange need quantity or inventory/ownership semantics before this concept can be exported?
-9. Which domain events constitute shareable historical facts, how long are they retained, and which Simulation calendar fields map into World Exchange v1 `year` or `occurredAt`?
-10. Is an NPC’s directed affinity/trust/fear an internal actor assessment or a public relationship fact? If public, what observer, value, and temporal semantics must the contract carry?
-11. Which Simulation read boundary can guarantee a coherent as-of snapshot, and should that snapshot day be added to a future World Exchange version or an agreed envelope?
+1. What Simulation concept does World represent, and which authority supplies its stable ID independent of configuration name, seed, Unity asset, authored profile, and runtime instance?
+2. Which Persons are in scope, including non-materialized/unnamed people? Who owns the public name and age time rule?
+3. Will Simulation define a general City/Settlement ID? How does P14-A settlementSemanticId relate to City identity outside its bounded profile?
+4. How should City-to-Location anchors, Person residence, At, and InTransit be represented without conflation?
+5. What source supplies Location.name/kind, and are Hex, Location, Crossing, Site, and LocalTopology distinct public concepts?
+6. Is generic Organization intentionally deferred, and what future owner/type/member-role contract would make it projectable?
+7. What are public Institution type, membership, and location semantics? Does office representation need its own concept?
+8. Does Item mean definition, fungible stock, owned quantity, stack, or unique artifact? How do title, owner, custodian, location, and quantity relate?
+9. Which retained domain records become public HistoricalEvents, how do IDs survive restart, and how does the custom calendar map to v1 event time?
+10. Which relationship types belong in v1, and what direction, cardinality, ID, and validity rules apply? Are actor appraisals excluded?
+11. What coherent read point and temporal value identify the projection when v1 has no as-of field and Simulation distinguishes day-level facts from logical instants?
+12. Which repository owns the projection input contract/tests without depending on consumer packages or copying Simulation runtime types?
 
 ## Decision boundary
 
-This study can guide a Simulation-side architecture discussion. It cannot establish Simulation domain contracts, decide their canonical owners, or make missing Simulation concepts appear in the External schema. Until those decisions are approved, fixtures remain the External consumers’ source.
+This study corrects External documentation against promoted Simulation architecture. It proposes an External mapper behind a Simulation-approved read port and identifies entity mappings complete only at the concept level. It does not redefine Simulation or decide its open architecture questions. Fixtures remain the External consumer source until the projection contract is approved.

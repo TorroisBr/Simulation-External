@@ -1,113 +1,121 @@
 # Simulation Entity Mapping
 
-Evidence in this document is from Simulation `main` at `002a55859544d1e26247c274e6d52590fa671a90`. Paths are relative to the Simulation repository. Field names below are candidates for discussion, not approval to export. The classification meanings are defined in [the projection study](SIMULATION_PROJECTION_STUDY.md).
+This document maps World Exchange v1 against promoted Simulation architecture. The previous mapping used Simulation main at 002a55859544d1e26247c274e6d52590fa671a90. Its findings are superseded by the canonical refs listed in [the projection study](SIMULATION_PROJECTION_STUDY.md). Classifications describe concept mapping, not exporter readiness.
 
-## World — `BLOCKED_BY_CURRENT_ARCHITECTURE`
+## World — BLOCKED_BY_CURRENT_ARCHITECTURE
 
-- **Authoritative sources:** `Assets/_Project/Scripts/SimulationConfigData.cs` (`simulationName`, configured cities and NPCs), `Assets/_Project/Scripts/SimulationRuntime.cs` (active `Cities`, `NpcRuntimes`, and `CurrentDay`), and the scene setup in `Assets/_Project/Scripts/TesteSimulacao.cs`.
-- **Identity:** No stable World ID was found. `simulationName` is a display label. A Unity asset ID, asset filename, or runtime object identity is not an approved public ID.
-- **Safe factual fields:** The configured label can be a candidate `world.name` after deciding that one SimulationConfig is one World. There is no authored `era` or world description contract in this source.
-- **Derivable relationships:** The configured City set is enumerable from the active runtime, subject to stable City IDs.
-- **Derived/presentation-only:** Enabled modules, random seed, logging, economy settings, calendar dimensions, and scenario diagnostics describe setup or execution and are not World metadata by default.
-- **Knowledge:** Do not aggregate NPC Spatial or Commercial Knowledge into World metadata.
-- **Missing/ambiguous:** World versus scenario versus runtime-instance semantics; stable World ID; payload observation time.
-- **Adapter:** Yes, through the future common projection boundary after Simulation defines the World identity and ownership.
+- Authoritative sources: Phase 9 owns a selected authored bootstrap profile and provenance. SimulationConfigData and the initialized runtime provide configuration/run context. No canonical World domain record or World identity contract was found.
+- Stable identity: None for a World. Profile/configuration label, seed, Unity asset identity, or runtime object is not a stable World ID.
+- Safe facts: No complete World entity. An authored profile name could be a display candidate only after Simulation defines whether that profile denotes a World. Do not emit it as identity or infer era/description.
+- Derivable relationships: An authored profile composes selected City/geography inputs, but that is profile composition, not a proven World-to-City domain relation for all worlds.
+- Derived/presentation-only: SimulationConfigData.simulationName, profile names, seed, module configuration, diagnostics, and logging describe authoring or execution; they are not automatically World metadata.
+- Knowledge: Do not aggregate Person, Institution, or Faction Knowledge into World metadata.
+- Missing/ambiguous: World versus scenario/configuration/runtime meaning; stable identity and lifecycle; name ownership; multi-profile worlds; as-of time.
+- Adapter: Required after Simulation chooses a World authority and stable ID. Until then a valid v1 payload cannot be emitted.
 
-## Person — `PARTIALLY_SUPPORTED`
+## Person — PARTIALLY_SUPPORTED
 
-- **Authoritative sources:** `Assets/_Project/Scripts/Data/NpcData.cs` supplies authored `id` and `name`; `Assets/_Project/Scripts/Data/NpcJobData.cs` supplies a configured job label/type. `Assets/_Project/Scripts/NpcRuntime.cs` supplies current runtime state. `SimulationRuntime.NpcRuntimes` enumerates active NPCs; `TesteSimulacao.CreateNpcRuntimes` shows each configured NPC entry creates a runtime instance.
-- **Identity:** `NpcData.DefinitionId` is a candidate definition key, not always an instance key: the same `NpcData` can be configured more than once. `NpcRuntime.RuntimeId` distinguishes active instances but comes from a resettable sequence allocator. Neither is yet a durable public Person ID contract.
-- **Safe factual fields:** Authored `name`; a job/occupation label only if Simulation confirms the job definition means current occupation. Current city presence can be read when `CurrentCity` is non-null, but it is not a permanent residence. Inventory, status, current action, money, and travel-plan fields need separate public-domain decisions and do not map to existing Person v1 fields.
-- **Derivable relationships:** A current City/Location reference may be possible after the Location and in-transit rules are resolved. Organization membership may be derivable from an active, authoritative organization source once integrated. Event participants can be linked only through durable Person IDs.
-- **Derived/presentation-only:** `NpcName` fallback text and chronicle text are display helpers. Simulation status and chosen action are runtime mechanics, not Person biography.
-- **Knowledge:** Exclude `SpatialKnowledgeRuntime` and `CommercialKnowledgeRuntime`. A person’s known routes, locations, or market observations do not establish world truth.
-- **Missing/ambiguous:** Stable instance key; age, gender, biography; residence distinct from current presence; what population of persons is in scope; exact state while in transit. Core guidance says ordinary city population is abstract and only relevant NPCs have full `NpcRuntime` state.
-- **Adapter:** Yes, once person-instance identity, field meanings, scope, and current-location rules are approved.
+- Authoritative sources: Phase 5 PersonId, PersonRuntime, and PersonStore own individual identity and birth/death/residence facts. A Person may exist without a materialized NpcRuntime. NpcData supplies authored names for NPC definitions; NpcRuntime represents a materialized actor. Phase 8 adds explicit Person spatial position. Phase 11 actor choice uses PersonId.
+- Stable identity: PersonId is a stable semantic identity for one individual in a Simulation world and survives dormancy/death. NpcRuntimeId is execution lookup identity; NpcData.DefinitionId is authored definition identity and may not distinguish multiple people based on one definition.
+- Safe facts: A non-empty authored NpcData name is a candidate Person.name for that named individual. BirthAbsoluteDay and DeathAbsoluteDay are factual Simulation time values but v1 has no birth/death fields. Age is derived from birth, calendar, and as-of day. Job/occupation is safe only if Simulation confirms the field denotes current occupation. No canonical gender or biography source was established.
+- Derivable relationships: Current active Faction affiliation resolves through PersonId/FactionId. Person position may resolve to stable LocationId when At that Location. Residence is separate but currently refers to a runtime settlement identity; it needs a stable City crosswalk. Genealogy has explicit PersonId endpoints, but public Relationship vocabulary/edge ID is undefined. Office incumbent does not automatically mean Institution member.
+- Derived/presentation-only: Age is time-dependent. NpcName fallbacks, chronicle prose, current action, decision utility, inventories, money, and diagnostics do not define Person identity or biography.
+- Knowledge: Exclude spatial location/route beliefs, market observations, political Knowledge, decision evidence, and SocialReaction. These are actor-held or interpreted information, not shared world facts.
+- Missing/ambiguous: Which Persons are in scope, especially non-materialized/unnamed records; public name for every Person; residence-to-City identity; age/as-of rule; Hex-only and InTransit mapping; gender/biography.
+- Adapter: Required. It must map PersonId, join only approved authored names, calculate optional age at the selected as-of time, and resolve residence and location separately without publishing runtime IDs.
 
-## City — `PARTIALLY_SUPPORTED`
+## City — PARTIALLY_SUPPORTED
 
-- **Authoritative sources:** `Assets/_Project/Scripts/Data/CityData.cs` supplies `id`, `cityName`, and `initialPopulation`; `Assets/_Project/Scripts/CityRuntime.cs` supplies the active city, `CurrentPopulation`, `Location`, and `ImportantNpcs`. `SimulationRuntime.Cities` exposes active City runtimes.
-- **Identity:** `CityData.DefinitionId` is a candidate authored key, but a configured city definition may be instantiated more than once. `CityRuntime.RuntimeId` is runtime allocated and not stable across initialization.
-- **Safe factual fields:** Authored city name. Current aggregate population can be considered for `populationSummary` only if labeled as abstract Simulation population; v1 offers text, not a typed count. `initialPopulation` is configured starting state, not a substitute for current population.
-- **Derivable relationships:** City to its associated spatial graph node is derivable from `CityRuntime.Location`, and its important-NPC list is available. The node’s public Location semantics and IDs are unresolved. `ImportantNpcs` is not a complete census. City connections produce directed travel routes and durations, not an existing World Exchange city relation.
-- **Derived/presentation-only:** `CityName` fallback string is presentation. Market stock, price, liquidity, consumption, and production are Simulation economy state and have no direct City v1 fields.
-- **Knowledge:** Merchant market observations for a city/location remain actor Knowledge, not City facts. Use the authoritative `CityRuntime` source if current market facts are ever approved separately.
-- **Missing/ambiguous:** Stable City instance key; region, founded year, and descriptive content; population meaning/precision; distinction among City, Location, and route node.
-- **Adapter:** Yes, after identity and aggregate/Location semantics are approved.
+- Authoritative sources: CityData supplies authored DefinitionId and cityName; CityRuntime and settlement population authority expose current aggregate state; Phase 8 binds City owners to stable Locations; Phase 14 adds bounded settlement/material-flow facts.
+- Stable identity: CityRuntime.RuntimeId is runtime allocated. CityData.DefinitionId identifies authored City content, not a generally approved instance. P14-A CityData.settlementSemanticId is a stable semantic owner key for that bounded material-flow profile, not a universal CityId.
+- Safe facts: Authored cityName is a candidate City.name. Current aggregate population may become populationSummary only with agreed wording and as-of definition; it is not an individually represented census. P14-A LocationId is a candidate City.locationId after identity joins are approved. initialPopulation is not current population.
+- Derivable relationships: City-to-Location anchor can be joined from the Phase 8 City/Site anchor authority through the current City owner and stable LocationId, then remapped through approved City identity. Important-NPC lists are not a complete census and do not establish a general “important” policy. CityConnection routes/durations are not City or generic Relationship edges.
+- Derived/presentation-only: CityName fallback strings, market display values, prices, liquidity, production logs, and UI summaries are not City description or identity.
+- Knowledge: Commercial observations for a market remain observer-scoped and may be stale or second-hand. Do not use them as City population, price, stock, or trade facts.
+- Missing/ambiguous: General stable City/Settlement instance identity; repeated-definition behavior; long-lived name semantics; population count/wording; region/founded year/description; P14 settlement identity outside its bounded profile.
+- Adapter: Required. It needs Simulation-approved City identity and must resolve City, residence, and Location references without RuntimeId as a cross-run key.
 
-## Location — `BLOCKED_BY_CURRENT_ARCHITECTURE`
+## Location — PARTIALLY_SUPPORTED
 
-- **Authoritative sources:** `Assets/_Project/Scripts/SpatialRuntime.cs` defines `SpatialLocationRuntime` and `SpatialRouteRuntime`; `TesteSimulacao.CreateCityRuntimes` creates one spatial node for each runtime City and `CreateSpatialRoutes` connects nodes based on `CityData.connections`.
-- **Identity:** `SpatialLocationRuntime.RuntimeId` is allocated from `RuntimeIdAllocator` per initialization. No authored location key exists in the inspected source.
-- **Safe factual fields:** Route endpoints and configured travel-day duration exist, but World Exchange Location has no route-duration field. The location runtime itself exposes only its runtime ID.
-- **Derivable relationships:** A node can be associated with the City whose `CityRuntime.Location` is that exact object. This supports a possible one-node-per-city projection only if Simulation confirms a transport node is also a public Location entity.
-- **Derived/presentation-only:** `Assets/_Project/Scripts/TesteSimulacao.cs` (`ResolveLocationDisplayName`) resolves a node through a separate location-to-city dictionary and returns a City display name. That presentation mapping does not give `SpatialLocationRuntime` an authored name or kind.
-- **Knowledge:** `SpatialKnowledgeRuntime` is owned by an NPC and records known node/route runtime IDs. Never use it to decide which locations exist in the factual exchange.
-- **Missing/ambiguous:** Stable location identity, required v1 `name` and `kind`, authored description/containment, exact positions, and whether graph nodes are canonical places or only navigation topology.
-- **Adapter:** Yes only after Simulation resolves that model and provides stable public location facts. Until then omit Location entities and dependent refs rather than synthesizing them from names.
+- Authoritative sources: Phase 7 spatial authority and Phase 8 factual geography own stable Hex/Location records, anchors, authored geometry, City/Site bindings, Person position, and separate route Knowledge. Phase 9-B composes one authored Hex and anchored Location. Phase 10 consumes Location for a bounded Ruin/LocalTopology seam.
+- Stable identity: LocationId and HexId are stable typed semantic identities. SpatialLocationRuntime.RuntimeId belongs to the legacy runtime graph and is not interchangeable with LocationId.
+- Safe facts: Location existence, LocationId, and anchored Hex reference are factual. Authored Hex coordinates, scale, and terrain references are source facts, but v1 Location has no coordinate or terrain fields. The Location authority has no general name or kind.
+- Derivable relationships: City/Site anchor binding can connect an owner to LocationId after the owner has a stable public ID. Anchored Hex is not a World Exchange Location by implication. LocalTopology containment does not establish generic parentLocationId.
+- Derived/presentation-only: A runtime node label resolved from its City, a Ruin label, renderer coordinates, diagnostic formatting, and LocalTopology labels do not populate Location.name/kind.
+- Knowledge: Known locations/routes, estimated crossing availability, route plans, and observation freshness are Knowledge or plan data. They do not determine factual Location existence.
+- Missing/ambiguous: Required v1 name and kind; public place taxonomy; which authored facts belong in v1; mapping of Hex, Location, Crossing, Site, and LocalTopology; stable City owner mapping.
+- Adapter: Required. It may map LocationId only after required v1 labels and City relation semantics are approved; omit rather than synthesize missing fields.
 
-## Organization — `PARTIALLY_SUPPORTED`
+## Organization — DEFERRED
 
-- **Authoritative sources:** `Assets/_Project/Scripts/Data/OrganizationData.cs` supplies authored `id` and `displayName`; `Assets/_Project/Scripts/OrganizationRuntime.cs` models members and `Member`/`Leader` roles; `Assets/_Project/Scripts/OrganizationStore.cs` indexes current organization runtimes and memberships.
-- **Identity:** `OrganizationData.DefinitionId` is a candidate definition key. `OrganizationRuntime.RuntimeId` is runtime allocated. Membership references currently use NPC runtime IDs.
-- **Safe factual fields:** Authored display name and membership/role are present in these source types. The role cannot be represented in `Organization.memberIds` or `Person.organizationIds`; project membership only if role loss is accepted. World Exchange requires `Organization.type`, for which no source field exists.
-- **Derivable relationships:** Organization members can be remapped to Person IDs if a canonical active organization source and stable Person mapping are established. V1 direct member references are more appropriate than a generic Relationship for simple membership.
-- **Derived/presentation-only:** `DisplayName` is authored display content; filenames and Unity asset labels are not IDs.
-- **Knowledge:** No organization-specific Knowledge contract was found. Do not infer affiliations from NPC decisions, job type, trade knowledge, or presence in a city.
-- **Missing/ambiguous:** Required organization type, city/location/faction association, durable identity, membership lifecycle/role visibility, and active scenario wiring. `Assets/_Project/Scripts/SimulationConfigData.cs` has no organization list, and the inspected `Assets/_Project/Scripts/TesteSimulacao.cs` (`InitializeSimulation`) path does not construct or attach an `OrganizationStore`.
-- **Adapter:** Yes after Simulation makes organizations part of the owned projection source and defines type/membership semantics.
+- Authoritative sources: Legacy OrganizationData, OrganizationRuntime, and OrganizationStore types exist, but canonical architecture identifies them as legacy/local and explicitly defers a generic Organization domain. No current general world-owned Organization authority/configuration path was found.
+- Stable identity: OrganizationData.DefinitionId is authored definition identity; OrganizationRuntime identity and membership endpoints are runtime-scoped. No promoted general Organization instance ID exists.
+- Safe facts: None under an approved generic Organization contract. Legacy DisplayName alone does not promote the concept.
+- Derivable relationships: Do not infer membership from jobs, faction affiliation, spatial presence, office occupancy, or a legacy store outside canonical ownership.
+- Derived/presentation-only: Legacy display helpers and UI labels do not prove a durable organization type or fact.
+- Knowledge: No Knowledge can establish Organization existence or membership.
+- Missing/ambiguous: Canonical owner, definition/instance identity, required v1 type, active membership/roles, and City/Location/Faction relations.
+- Adapter: Not until Simulation promotes or approves generic Organization authority and its identity/membership contract. This is a Simulation architecture question.
 
-## Institution — `DEFERRED`
+## Institution — PARTIALLY_SUPPORTED
 
-- **Authoritative sources:** No Institution type, data, runtime, or configuration source was found in the tracked Simulation source at the inspected ref.
-- **Identity:** None defined.
-- **Safe factual fields:** None established.
-- **Derivable relationships:** Do not infer institutions from Organizations, jobs, guards, or enabled modules.
-- **Derived/presentation-only:** None established.
-- **Knowledge:** No Knowledge source can create an Institution fact.
-- **Missing/ambiguous:** Domain meaning, owner, identity, lifecycle, and membership/location rules.
-- **Adapter:** Not until Simulation defines and owns an Institution concept; then map it through the shared adapter under an approved contract.
+- Authoritative sources: Phase 5 InstitutionStore and OfficeStore are world-owned. InstitutionRecord owns InstitutionId and DisplayName; OfficeRecord owns OfficeId and InstitutionId; current OfficeIncumbency references PersonId. Factual death and institutional vacancy recognition are distinct.
+- Stable identity: InstitutionId and OfficeId are typed semantic identities. OfficeId is not an Institution ID; PersonId remains the incumbent identity.
+- Safe facts: Institution DisplayName is a candidate Institution.name. Registered Institution existence and current office records/incumbencies are authoritative in that domain. Current records do not provide Institution type, City, Location, or a general member list.
+- Derivable relationships: Institution-to-Office and Office-to-current-incumbent follow explicit records. World Exchange has no Office entity. Incumbency does not mean general Institution membership, so do not put officeholders in Institution.memberIds without approved semantics.
+- Derived/presentation-only: Vacancy recognition is explicit institutional state, separate from factual death. Tenure history is not current membership or Institution description.
+- Knowledge: Political observations held by an Institution are holder-scoped Knowledge; they do not establish Institution type, membership, or universal political truth.
+- Missing/ambiguous: Required v1 Institution.type; public role/member semantics; City/Location relation; whether offices need their own entity or typed Relationship.
+- Adapter: Required after Simulation defines the missing required field and whether office facts belong in v1. Preserve incumbent and tenure boundaries.
 
-## Faction — `DEFERRED`
+## Faction — PARTIALLY_SUPPORTED
 
-- **Authoritative sources:** No Faction type, data, runtime, or configuration source was found in the tracked Simulation source at the inspected ref. `OrganizationData` has no faction association.
-- **Identity:** None defined.
-- **Safe factual fields:** None established.
-- **Derivable relationships:** Do not infer factions from directed NPC relations, organization membership, jobs, or crime/guard modules.
-- **Derived/presentation-only:** None established.
-- **Knowledge:** No Knowledge source can create a Faction fact.
-- **Missing/ambiguous:** Domain meaning, stable identity, members, city/organization ties, and lifecycle.
-- **Adapter:** Not until Simulation defines and owns a Faction concept; then map it through the shared adapter under an approved contract.
+- Authoritative sources: Phase 6 FactionRecord and FactionStore own registered Faction facts. FactionAffiliationRecord records explicit PersonId membership tenure and active/ended state. Faction Knowledge is separately holder-scoped.
+- Stable identity: FactionId is stable semantic identity; FactionAffiliationId identifies an affiliation tenure; PersonId identifies the member. Use FactionId for Faction and only active affiliations for current member references.
+- Safe facts: A non-empty FactionRecord.DisplayName could map to required World Exchange Faction.name. FactionStore registration requires a stable FactionId but does not require a non-empty display name, so the required v1 name is not guaranteed. FactionId maps to entity ID through the approved type-scoped map. Active affiliation endpoints map to optional memberIds. Ideology, City/Organization association, and description are not established by these records.
+- Derivable relationships: Current affiliation derives Faction.memberIds and matching Person.factionIds. Ended records are historical, not current membership. Membership does not imply support, loyalty, Knowledge, or Knowledge propagation.
+- Derived/presentation-only: Membership policy, expulsion permission, legitimacy, support, recognition, political position, and diagnostic ordering are not Faction ideology or description.
+- Knowledge: Faction-held political Knowledge is an independent Faction perspective, not membership truth and not copied to Persons.
+- Missing/ambiguous: Required name is not enforced by canonical registration. Optional ideology and City/Organization associations are absent but v1 does not require them. World identity and shared read port remain cross-cutting prerequisites.
+- Adapter: Required. It needs an approved rule to omit unnamed factions or Simulation to enforce/own a public non-empty name. It must not fabricate a fallback. Active membership can otherwise be read from explicit affiliation facts.
 
-## Item — `BLOCKED_BY_CURRENT_ARCHITECTURE`
+## Item — PARTIALLY_SUPPORTED
 
-- **Authoritative sources:** `Assets/_Project/Scripts/Data/ItemData.cs` contains item definition `id`, `itemName`, and `basePrice`. `Assets/_Project/Scripts/InventoryRuntime.cs` stores aggregated quantities and average cost per `ItemData`; City market state is keyed by the same definitions.
-- **Identity:** `ItemData.DefinitionId` identifies a catalog definition candidate, not an individual held object or inventory stack. Aggregated inventory entries have no independent stable ID.
-- **Safe factual fields:** Authored item name. Base price is a configured economy value, not an inherent world fact. Actual amounts and market values are mutable and are not fields in World Exchange v1 Item.
-- **Derivable relationships:** An NPC inventory associates an aggregate quantity with an NPC; city market stock associates a quantity with a City. Since Item v1 has an optional single `ownerId` and no quantity field, these associations cannot faithfully describe fungible holdings. Do not assign the item definition one owner or location.
-- **Derived/presentation-only:** Item labels resolved for chronicle/market presentation do not identify stack instances.
-- **Knowledge:** Per-merchant commercial observations are actor-scoped, time-bound Knowledge and cannot set the factual Item price, owner, or location.
-- **Missing/ambiguous:** Required `type`, definition-versus-instance meaning, quantity/stack model, multiple owners/locations, and stable IDs for unique artifacts if those are intended.
-- **Adapter:** Yes only after Simulation and External agree the entity semantics and, if needed, evolve the versioned schema.
+- Authoritative sources: ItemData is an authored item definition with DefinitionId, itemName, basePrice, and capability modifiers. InventoryRuntime and City market stock aggregate quantities by ItemDefinitionId. Phase 14 adds bounded material source and explicit settlement-owner/market-custodian facts.
+- Stable identity: ItemData.DefinitionId identifies a definition subject to authored identity lifecycle rules; it is not a unique held Item or stack ID. NotableItemRuntimeId is runtime allocated. P14-A source/store/settlement keys identify those records/owners, not item instances.
+- Safe facts: itemName is a candidate name for a catalog definition. Required World Exchange Item.type has no established ItemData source. basePrice is an economy setting, not inherent item truth. Quantities are mutable stock/holdings.
+- Derivable relationships: Stock associates a definition with settlement and market custody, but one definition can exist in many holdings. P14-A separates settlement ownership from market custody. World Exchange Item has one optional owner/location and no quantity/custodian fields; do not assign the definition one owner or location.
+- Derived/presentation-only: Resolved labels, market price displays, chronicle prose, and diagnostics are presentation/read-model output, not unique item identity.
+- Knowledge: Merchant commercial observations are time-bound actor Knowledge and cannot set global price, owner, location, or stock.
+- Missing/ambiguous: Required type; definition/instance meaning; definition lifecycle through content changes; quantity/title/custody/location model; whether unique artifacts are intended.
+- Adapter: Required after Simulation chooses the Item meaning and provides type, or External approves a versioned representation of needed facts. Do not turn P12 or aggregate stock into Item entities.
 
-## HistoricalEvent — `PARTIALLY_SUPPORTED`
+## HistoricalEvent — PARTIALLY_SUPPORTED
 
-- **Authoritative sources:** `Assets/_Project/Scripts/DomainEvents.cs` records outcome types and participant IDs; `DomainEventStore` holds the current runtime event list; `HistoryStore` retains events selected by `HistoryPolicy`. `Assets/_Project/Scripts/SimulationTime.cs` and `Assets/_Project/Scripts/Data/CalendarDefinition.cs` provide absolute day and a custom calendar. `Assets/_Project/Scripts/DecisionRecords.cs` records decisions; `Assets/_Project/Scripts/NpcChronicle.cs` combines decisions and events for a person-centric view.
-- **Identity:** `DomainEvent.EventId` is sequence allocated by `RuntimeIdAllocator`. `RecordSequence` orders records but is not a durable event identity. Neither is documented to survive reinitialization.
-- **Safe factual fields:** Approved outcome event kind, event day, actual actor/target/participants, and location references can be candidates when the corresponding stable IDs and public semantics exist. The event set currently includes travel start/arrival, arrest, escape, and party travel start/arrival. `HistoryPolicy` currently retains only escape events in `HistoryStore`, while all domain events are held in the runtime session store.
-- **Derivable relationships:** Participants and locations can be mapped only with the approved identity map. A travel-party ID or route ID is not a supported World Exchange entity ID by itself.
-- **Derived/presentation-only:** Decision records describe chosen actions, not outcomes. `NpcChronicleFormatter` creates presentation prose that changes by perspective; do not use the chronicle as event fact or external description.
-- **Knowledge:** An NPC’s chronicle relation (actor, affected target, support, participant) is a personal view/index, not public event truth. Export event participants from approved event data, not from inferred Knowledge.
-- **Missing/ambiguous:** Cross-run event identity, durable retention/window, approved event vocabulary/titles, actor visibility/privacy, event time mapping from custom calendar to v1 `year`/`occurredAt`, and a source snapshot/as-of rule.
-- **Adapter:** Yes after event retention, public fields, IDs, and custom calendar mapping are defined. Do not reconstruct the event list from P12 or decisions.
+- Authoritative sources: Bounded retained records include Phase 5 OfficeTenureRecord and explicit property/estate continuity; Phase 6 claim/recognition and faction affiliation histories; Phase 7 terminal Battle outcome/provenance and downstream BattleResolved evidence. DomainEventStore and HistoryStore have separate lifetime and retention rules.
+- Stable identity: Some source records have domain IDs such as FactionAffiliationId. No universal HistoricalEventId or event stream exists. DomainEvent.EventId/RecordSequence are runtime/session-oriented and not proven stable across reinitialization.
+- Safe facts: An explicitly retained and approved outcome record may provide title/type, time, participants, Location refs, and related IDs only when the source owns those facts. There is no generic conversion rule today.
+- Derivable relationships: Participants/locations can be remapped only through stable PersonId/LocationId identities in the same payload. Decision actor, target, or evidence alone does not prove event participation.
+- Derived/presentation-only: NpcChronicle and its formatter combine decisions and outcomes in a Person-oriented presentation. Diagnostics, snapshots, canonical text, and timelines are not a public event source.
+- Knowledge: A Person's awareness, chronicle role, support, or perceived attribution is distinct from event outcome and actual participants.
+- Missing/ambiguous: Retention scope, public event catalog, generic event ID, restart lifecycle, title/description owner, custom-calendar mapping to required year/occurredAt, visibility, and as-of consistency.
+- Adapter: Required. Select only approved retained records, preserve source identity/outcome, map time explicitly, and never rebuild events from current facts, P12 snapshots, choices, or formatted chronicles.
 
-## Relationship — `BLOCKED_BY_CURRENT_ARCHITECTURE`
+## Relationship — PARTIALLY_SUPPORTED
 
-- **Authoritative sources:** `Assets/_Project/Scripts/NpcRelationRuntime.cs` and `Assets/_Project/Scripts/NpcRelationStore.cs` define directed NPC-to-NPC affinity, trust, and fear values. The inspected Simulation runtime setup does not instantiate or attach `NpcRelationStore`. `Assets/_Project/Scripts/OrganizationRuntime.cs` separately records membership edges, but simple membership already has direct references in World Exchange Organization/Person.
-- **Identity:** NPC runtime IDs are used as endpoints; no durable edge ID or public relation type is defined. A deterministic edge ID is possible only after type, direction, multiplicity, and lifecycle are approved.
-- **Safe factual fields:** No current source establishes an objective, public relationship type or label. Affinity/trust/fear are evaluations by the source NPC, not mutually agreed world facts.
-- **Derivable relationships:** Future organization membership may populate `Organization.memberIds` and `Person.organizationIds` if the store becomes an authoritative world source. Do not encode it twice as a general Relationship unless a consumer need and meaning are approved. City route edges need resolved Location semantics and a public representation of direction/duration.
-- **Derived/presentation-only:** `NpcChronicleRelation` values categorize a person’s role in a chronicle; they are view semantics, not relationship facts.
-- **Knowledge:** Although `NpcRelationRuntime` is not a Knowledge store, its direction makes its values actor-specific. Do not flatten it into objective world truth or map its numeric values into undocumented labels.
-- **Missing/ambiguous:** Meaning of World Exchange Relationship, public versus actor-specific scope, value/observer/time semantics, stable edge ID, active source wiring, and any supported family/social/political relation types.
-- **Adapter:** Yes only after Simulation and External define which directed facts are public and how identity/value/perspective are represented. Omit current affinity/trust/fear from v1 by default.
+- Authoritative sources: Objective domain relations include Person parentage/genealogy, active Faction affiliation, and Institution-Office incumbency. Phase 6 says generalized C3 persistent relationship projection remains deferred. NpcRelationRuntime holds directed actor appraisals; C1 SocialReaction is appraisal/history, not a general public social edge.
+- Stable identity: No universal public RelationshipId/type contract. Some domains have their own IDs such as FactionAffiliationId. Do not relabel a domain ID as generic relationship identity without approval. Do not hash endpoints before direction, multiplicity, and lifecycle are defined.
+- Safe facts: Only a named, typed relation with approved public semantics. Active Faction membership can use v1 direct member/faction fields. Parentage or incumbency might use a v1 Relationship only after type and identity rules are accepted. Trust/fear/affinity are not objective relationship facts.
+- Derivable relationships: Current affiliation from active records; parent/child from genealogy; office/institution links from OfficeRecord and OfficeIncumbency. These differ and must not be duplicated when direct fields already represent membership.
+- Derived/presentation-only: Kinship visualization, chronicle relation labels, derived support/legitimacy, social reaction summaries, and timeline text are not generic authoritative relationship records.
+- Knowledge: Political Knowledge, beliefs, perceived attribution, and directed NPC appraisals are perspective-specific. Do not flatten them into objective or reciprocal Relationship facts.
+- Missing/ambiguous: Public type vocabulary, direction/cardinality, stable edge ID, temporal validity, which family/office/social ties belong in v1, and deferred C3 scope.
+- Adapter: Required for any approved subset. Preserve domain meanings, use direct entity fields for direct membership when appropriate, and omit unsupported generic edges.
+
+## Cross-entity guardrails
+
+- World Exchange IDs are globally unique in a payload, including the World entity; all refs must resolve within the payload.
+- Keep semantic source identity separate from External ID encoding. Names, runtime IDs, filenames, Unity GUIDs, and array positions do not resolve ambiguity.
+- Current Location, residence City, active affiliation, historical tenure, and recorded outcome are distinct concepts.
+- Only publish descriptive fields supplied by the owning Simulation authority. A missing required v1 field blocks mapping; do not fabricate a label.
+- A projection read cannot mutate Simulation or publish changes back into it.
