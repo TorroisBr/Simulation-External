@@ -1,0 +1,44 @@
+import { describe, expect, it } from "vitest";
+import { worldFixture } from "@simulation-external/world-fixtures";
+import { renderWorldMarkdownNotes } from "@simulation-external/world-markdown";
+import {
+  collectionEntries,
+  worldName,
+} from "../../../apps/web/src/lib/world.js";
+import { projectWorldExchange } from "../src/index.js";
+import { createConsumerCompatibilityMock } from "./fixtures/mock-source.js";
+
+describe("World Exchange consumer compatibility", () => {
+  it("passes through the same Web data helpers used with fixtures", () => {
+    const result = projectWorldExchange(createConsumerCompatibilityMock());
+    if (!result.exchange)
+      throw new Error("Expected a complete fixture-backed exchange");
+
+    expect(worldName(result.exchange)).toBe(
+      "Projection Consumer Check Fixture",
+    );
+    expect(worldName(worldFixture)).toBe("The Lyran Reach");
+    expect(collectionEntries(result.exchange, "people")).toHaveLength(2);
+    expect(collectionEntries(result.exchange, "cities")[0]?.entity.id).toBe(
+      "simulation-external:projection-v1:city:fixture-city%3Aaurora",
+    );
+  });
+
+  it("passes the projected value directly to the shared Markdown renderer", () => {
+    const result = projectWorldExchange(createConsumerCompatibilityMock());
+    if (!result.exchange)
+      throw new Error("Expected a complete fixture-backed exchange");
+
+    const projectedNotes = renderWorldMarkdownNotes(result.exchange);
+    const fixtureNotes = renderWorldMarkdownNotes(worldFixture);
+    const personNote = projectedNotes.find(({ type }) => type === "person");
+
+    expect(projectedNotes.length).toBeGreaterThan(1);
+    expect(fixtureNotes.length).toBeGreaterThan(1);
+    expect(personNote?.content).toContain(
+      'simulation_world_id: "simulation-external:projection-v1:world:fixture-world%3Aprojection-consumer-check"',
+    );
+    expect(personNote?.content).toContain("### Related notes");
+    expect(personNote?.content).not.toContain("actorKnowledgeByPerson");
+  });
+});

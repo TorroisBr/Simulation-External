@@ -1,0 +1,31 @@
+{
+  "name": "@simulation-external/world-projection",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Fixture-backed prototype for a read-only source-to-World-Exchange projection boundary.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@simulation-external/world-schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@simulation-external/world-fixtures": "workspace:*",
+    "@simulation-external/world-markdown": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "pnpm --filter @simulation-external/world-schema build && pnpm --filter @simulation-external/world-fixtures build && pnpm --filter @simulation-external/world-markdown build && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "test": "pnpm --filter @simulation-external/world-schema build && pnpm --filter @simulation-external/world-fixtures build && pnpm --filter @simulation-external/world-markdown build && vitest run"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

@@ -22,6 +22,7 @@ Simulation-External is separate from Simulation core and cannot redefine canonic
 
 - `packages/world-schema` owns renderer-agnostic World Exchange v1 types, ID/reference rules, indexes, and runtime validation.
 - `packages/world-fixtures` provides the validated fictional world shared by apps and tests.
+- `packages/world-projection` prototypes a read-only candidate-facts adapter into World Exchange using External-owned mocks; it has no Simulation source implementation.
 - `packages/world-markdown` renders deterministic notes and safely merges generated content outside Obsidian.
 - `apps/web` presents the fixture through the World Explorer.
 - `apps/obsidian-plugin` adapts the same exchange to an Obsidian vault and invokes the shared Markdown package.
@@ -45,9 +46,9 @@ The Web Explorer provides world overview, global search, entity lists and detail
 
 ## Integration status
 
-**Implemented:** World Exchange schema and validation; fixture world; Web consumer; deterministic Markdown transformation and sync safeguards; Obsidian fixture export prototype.
+**Implemented:** World Exchange schema and validation; fixture world; Web consumer; deterministic Markdown transformation and sync safeguards; Obsidian fixture export prototype; External-only, fixture-backed projection boundary prototype with omission reporting and consumer compatibility tests.
 
-**Not implemented:** a real Simulation exporter; live IPC; runtime mutation; P12 save consumption; Mod API; live bidirectional synchronization.
+**Not implemented:** a real Simulation exporter or Simulation-owned source contract; live IPC; runtime mutation; P12 save consumption; Mod API; live bidirectional synchronization.
 
 ## Simulation dependency boundaries
 
@@ -55,7 +56,7 @@ Future projection work needs an agreed domain authority and a read-only contract
 
 ## Current roadmap stage
 
-Stages A (schema and fixtures), B (Web Explorer), and C (Obsidian export/sync prototype) are implemented. The next architectural stage is D: design and coordinate a read-only Simulation projection boundary. Runtime exporter implementation requires explicit coordination and authorization. Stages E and F remain future work.
+Stages A (schema and fixtures), B (Web Explorer), and C (Obsidian export/sync prototype) are implemented. Stage D has a corrected read-only projection study and an External-only fixture-backed boundary prototype; Simulation-side source authority and World identity remain unresolved, so no real exporter exists. Runtime exporter implementation requires explicit coordination and authorization. Stages E and F remain future work.
 
 ## Validation
 
@@ -72,7 +73,7 @@ git diff --check
 
 ## Git and durability
 
-Make commits at meaningful durable boundaries. Do not force push or rewrite shared history, and do not modify the Simulation repository. At the last repository inspection for this reference, `main` and `origin/main` both pointed to `60f473c` with a clean working tree. Re-check `git status -sb` and the remote before relying on later commits: a local commit alone is not remotely durable.
+Make commits at meaningful durable boundaries. Do not force push or rewrite shared history, and do not modify the Simulation repository. At the last repository inspection for this reference, `main` and `origin/main` both pointed to `02cecd3` with a clean working tree. Re-check `git status -sb` and the remote before relying on later commits: a local commit alone is not remotely durable.
 
 ## Architectural invariants
 

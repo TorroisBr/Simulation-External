@@ -12,9 +12,9 @@ Build a fixture-driven web shell with search, entity navigation/details, relatio
 
 Generate deterministic notes from the same exchange. Preserve user-owned vault content and test synchronization outside Obsidian before adding the UI adapter.
 
-## Stage D — read-only Simulation exporter (future)
+## Stage D — read-only projection boundary (in progress)
 
-Requires coordination and an explicit integration contract with Simulation architecture owners. The exporter should project approved domain data into World Exchange and must not load persistence files or expose internal runtime state.
+The corrected study and an External-only fixture-backed adapter prototype define and exercise the boundary, including explicit omissions and consumer compatibility. The prototype does not read Simulation or establish its source contract. A real exporter remains future work and requires coordination and an explicit integration contract with Simulation architecture owners. It should project approved domain data into World Exchange and must not load persistence files or expose internal runtime state.
 
 ## Stage E — controlled authoring/import (future)
 
