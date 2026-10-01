@@ -12,6 +12,7 @@
 - Preserve user-authored Obsidian content. Synchronization may own marked generated regions and carefully defined metadata only.
 - Keep packages modular, renderer agnostic, and independent of any one consumer.
 - Do not add live Unity integration, IPC, sockets, an in-Simulation REST server, save loading/editing, runtime memory access, bidirectional live mutation, a Mod API, code injection, runtime plugin loading, authentication, multiplayer, cloud sync, or a production database unless separately authorized and architecturally coordinated.
+- For authorized Simulation source studies, use the ignored `.references/Simulation` mirror and its mirror workflow; do not use the sibling checkout. Never publish from the mirror, and preserve its local experiments and dirty state.
 
 ## Working practices
 

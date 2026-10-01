@@ -54,6 +54,8 @@ The Web Explorer provides world overview, global search, entity lists and detail
 
 Future projection work needs an agreed domain authority and a read-only contract that maps approved domain data into World Exchange. P12 or P19 decisions matter only where a specific projection question depends on them; Simulation-External does not wait for P12 as a whole. Unsupported concepts and unresolved authority questions should be recorded rather than inferred.
 
+Authorized Simulation source studies use the ignored local `.references/Simulation` mirror and the `simulation-reference-mirror` workflow. Canonical refs must be selected explicitly; `origin/main` is not assumed to be the architecture baseline. The mirror has local push protections, and the sibling Simulation checkout is not the study source.
+
 ## Current roadmap stage
 
 Stages A (schema and fixtures), B (Web Explorer), and C (Obsidian export/sync prototype) are implemented. Stage D has a corrected read-only projection study, an External-only fixture-backed boundary prototype, and a completed Stage D.1 contract pressure review. The v1 label optionality change does not supply Simulation-side World identity or a source contract, so no real exporter exists. Runtime exporter implementation requires explicit coordination and authorization. Stages E and F remain future work.

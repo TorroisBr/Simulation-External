@@ -11,11 +11,11 @@ Use only when an active request explicitly asks for a read-only investigation of
 
 ## Required reading
 
-Read this repository's `AGENTS.md`, `docs/EXTERNAL_SYSTEM_REFERENCE.md`, `docs/ARCHITECTURE.md`, `docs/WORLD_EXCHANGE.md`, and relevant roadmap entries. Read core-repository instructions before any authorized read-only inspection there.
+Read this repository's `AGENTS.md`, `docs/EXTERNAL_SYSTEM_REFERENCE.md`, `docs/ARCHITECTURE.md`, `docs/WORLD_EXCHANGE.md`, relevant roadmap entries, and `.agents/skills/simulation-reference-mirror/SKILL.md`. Use the mirror workflow before source inspection. Read the core-repository instructions at the selected canonical ref.
 
 ## Preconditions
 
-Confirm the prompt explicitly calls for the study and that the core repository is available for read-only inspection. If access or authorization is ambiguous, ask before opening or running tools against it.
+Confirm the prompt explicitly calls for the study and that `.references/Simulation` is available for read-only inspection. Never use the sibling Simulation checkout. If the mirror, source ref, or authorization is ambiguous, report the blocker instead of falling back to another checkout.
 
 ## Execution procedure
 
@@ -31,4 +31,4 @@ Core source authority is unclear, repository instructions prohibit the requested
 
 ## Must not do
 
-This is read-only: do not modify Simulation, create a worktree there, or run commands that write, build, test, or alter its Git state. Do not implement IPC, a runtime exporter, P12 persistence reading, or live mutation under this skill.
+This is read-only: do not modify Simulation, create a worktree there, or run commands that write source files, build, test, or alter canonical Git state. Use only `.references/Simulation`, preserve its local work, and never publish from it. Do not implement IPC, a runtime exporter, P12 persistence reading, or live mutation under this skill.
