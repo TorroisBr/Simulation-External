@@ -14,6 +14,7 @@ afterEach(cleanup);
 describe("World Explorer navigation", () => {
   it("opens a person and follows a related entity into its details", () => {
     render(<App />);
+    expect(screen.getByText("FIXTURE")).toBeTruthy();
 
     const entityNav = within(
       screen.getByRole("navigation", { name: "World entities" }),

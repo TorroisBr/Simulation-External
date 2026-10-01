@@ -93,8 +93,7 @@ input:focus-visible {
 .current-world svg {
   color: #a4a79f;
 }
-.world-status,
-.live-badge > span {
+.world-status {
   width: 7px;
   height: 7px;
   border-radius: 50%;
@@ -987,18 +986,20 @@ input:focus-visible {
   font-weight: 700;
   letter-spacing: 0.11em;
 }
-.live-badge {
+.fixture-badge {
   display: flex;
   align-items: center;
   gap: 7px;
-  color: #84917f;
+  color: #998251;
   font-size: 8px;
   font-weight: 700;
   letter-spacing: 0.1em;
 }
-.live-badge > span {
+.fixture-badge > span {
   width: 5px;
   height: 5px;
+  border-radius: 50%;
+  background: #b49a61;
   box-shadow: none;
 }
 .welcome-panel {

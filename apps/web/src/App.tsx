@@ -962,7 +962,7 @@ function WelcomePanel({
     <div className="welcome-panel">
       <div className="inspector-top">
         <span className="inspector-label">YOUR FIELD GUIDE</span>
-        <span className="live-badge">
+        <span className="fixture-badge">
           <span /> FIXTURE
         </span>
       </div>
