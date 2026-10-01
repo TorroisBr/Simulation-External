@@ -3,7 +3,7 @@
 ## Purpose and boundaries
 
 - This repository contains experimental external tools and integration surfaces for the Simulation project.
-- Never modify, write into, create worktrees for, or otherwise alter the Simulation core repository from work in this repository.
+- Do not modify, write into, create worktrees for, or otherwise alter the Simulation core repository unless a future prompt explicitly authorizes a coordinated cross-repository operation. Read-only inspection is allowed only when an integration study explicitly calls for it.
 - This repository does not redefine canonical Simulation architecture. Coordinate any future integration with the core maintainers.
 - Use fixture data until explicit, approved integration contracts exist. Avoid premature IPC or runtime coupling.
 - The Phase 12 persistence/save format is not the World Exchange format. Do not model persistence receipts, mutation epochs, hydration internals, runtime continuation state, internal stores, or Unity serialization here.
@@ -20,6 +20,31 @@
 - Run relevant tests, lint, and type checks before declaring a checkpoint complete; run consumer builds where applicable.
 - Keep fixtures representative and validate them against `@simulation-external/world-schema`.
 - Maintain docs when schema, ownership, mapping, or package boundaries change.
+
+## Required startup reading
+
+For architecture, schema, or integration work, read these before making changes:
+
+1. `AGENTS.md`.
+2. `docs/EXTERNAL_SYSTEM_REFERENCE.md`.
+3. The detailed design docs relevant to the task.
+4. The relevant workflow under `.agents/skills/*/SKILL.md`.
+
+For narrow UI or maintenance work, read the reference and the applicable skill when they materially affect the task. Inspect the repository state rather than trusting remembered paths or conversational summaries.
+
+## Documentation authority
+
+- `AGENTS.md` defines standing operating rules.
+- `docs/EXTERNAL_SYSTEM_REFERENCE.md` summarizes the current project and architecture.
+- `docs/ARCHITECTURE.md` and domain-specific docs provide detailed design authority.
+- `.agents/skills/*/SKILL.md` provides reusable execution procedures.
+- The current conversation prompt defines the objective for the active task; it does not silently replace project architecture.
+
+If these sources conflict, identify and report the conflict before making a consequential architectural choice. Do not silently invent a resolution.
+
+## Reference maintenance
+
+Update `docs/EXTERNAL_SYSTEM_REFERENCE.md` only when repository structure, architectural boundaries, implemented integration stage, a major World Exchange capability, the current roadmap stage, or permanent validation workflow changes. Do not update it for routine UI or fixture edits; keep detailed evidence in the domain docs and Git history.
 
 ## Logical agent responsibilities
 
