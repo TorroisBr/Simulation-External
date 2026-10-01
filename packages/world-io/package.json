@@ -1,0 +1,28 @@
+{
+  "name": "@simulation-external/world-io",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Portable JSON parsing and deterministic serialization for World Exchange v1.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "pnpm --filter @simulation-external/world-schema build && tsc -p tsconfig.json",
+    "typecheck": "pnpm --filter @simulation-external/world-schema build && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "test": "pnpm --filter @simulation-external/world-schema build && pnpm --filter @simulation-external/world-fixtures build && pnpm --filter @simulation-external/world-markdown build && vitest run"
+  },
+  "dependencies": {
+    "@simulation-external/world-schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@simulation-external/world-fixtures": "workspace:*",
+    "@simulation-external/world-markdown": "workspace:*"
+  }
+}

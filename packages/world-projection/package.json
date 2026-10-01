@@ -18,12 +18,13 @@
   },
   "devDependencies": {
     "@simulation-external/world-fixtures": "workspace:*",
+    "@simulation-external/world-io": "workspace:*",
     "@simulation-external/world-markdown": "workspace:*"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "typecheck": "pnpm --filter @simulation-external/world-schema build && pnpm --filter @simulation-external/world-fixtures build && pnpm --filter @simulation-external/world-markdown build && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
-    "test": "pnpm --filter @simulation-external/world-schema build && pnpm --filter @simulation-external/world-fixtures build && pnpm --filter @simulation-external/world-markdown build && vitest run"
+    "typecheck": "pnpm --filter @simulation-external/world-schema build && pnpm --filter @simulation-external/world-fixtures build && pnpm --filter @simulation-external/world-markdown build && pnpm --filter @simulation-external/world-io build && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "test": "pnpm --filter @simulation-external/world-schema build && pnpm --filter @simulation-external/world-fixtures build && pnpm --filter @simulation-external/world-markdown build && pnpm --filter @simulation-external/world-io build && vitest run"
   },
   "engines": {
     "node": ">=24"

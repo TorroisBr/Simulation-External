@@ -35,6 +35,9 @@ importers:
       '@simulation-external/world-fixtures':
         specifier: workspace:*
         version: link:../../packages/world-fixtures
+      '@simulation-external/world-io':
+        specifier: workspace:*
+        version: link:../../packages/world-io
       '@simulation-external/world-markdown':
         specifier: workspace:*
         version: link:../../packages/world-markdown
@@ -51,6 +54,9 @@ importers:
       '@simulation-external/world-fixtures':
         specifier: workspace:*
         version: link:../../packages/world-fixtures
+      '@simulation-external/world-io':
+        specifier: workspace:*
+        version: link:../../packages/world-io
       '@simulation-external/world-schema':
         specifier: workspace:*
         version: link:../../packages/world-schema
@@ -92,6 +98,19 @@ importers:
         specifier: workspace:*
         version: link:../world-schema
 
+  packages/world-io:
+    dependencies:
+      '@simulation-external/world-schema':
+        specifier: workspace:*
+        version: link:../world-schema
+    devDependencies:
+      '@simulation-external/world-fixtures':
+        specifier: workspace:*
+        version: link:../world-fixtures
+      '@simulation-external/world-markdown':
+        specifier: workspace:*
+        version: link:../world-markdown
+
   packages/world-markdown:
     dependencies:
       '@simulation-external/world-schema':
@@ -107,6 +126,9 @@ importers:
       '@simulation-external/world-fixtures':
         specifier: workspace:*
         version: link:../world-fixtures
+      '@simulation-external/world-io':
+        specifier: workspace:*
+        version: link:../world-io
       '@simulation-external/world-markdown':
         specifier: workspace:*
         version: link:../world-markdown

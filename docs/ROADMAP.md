@@ -16,6 +16,16 @@ Generate deterministic notes from the same exchange. Preserve user-owned vault c
 
 The corrected study and an External-only fixture-backed adapter prototype define and exercise the boundary, including explicit omissions and consumer compatibility. Stage D.1 has reviewed World Exchange field requirements: the World scope ID and stable entity IDs remain required, display names are optional, and domain type/event/relationship requirements remain in place. The prototype does not read Simulation or establish its source contract. A real exporter remains future work and requires coordination and an explicit integration contract with Simulation architecture owners. It should project approved domain data into World Exchange and must not load persistence files or expose internal runtime state.
 
+### Stage D.2 — portable World Exchange (implemented, fixture/project data only)
+
+`world-io` now parses, validates, and deterministically serializes normal
+World Exchange v1 JSON artifacts. The Web Explorer can open a local file, and
+Obsidian can manually import the same file through the existing safe Markdown
+sync path. The bundled fixture remains available. This makes the External
+artifact boundary usable by multiple consumers; it does not add a Simulation
+exporter, source contract, or live integration. See
+[Portable World Exchange](PORTABLE_WORLD_EXCHANGE.md).
+
 ## Stage E — controlled authoring/import (future)
 
 Requires separately agreed ownership, validation, conflict handling, authorization, and mutation contracts with Simulation core. No bidirectional live mutation is implemented by this roadmap foundation.

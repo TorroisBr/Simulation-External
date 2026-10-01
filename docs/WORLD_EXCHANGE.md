@@ -2,7 +2,7 @@
 
 ## Purpose and philosophy
 
-World Exchange is a renderer-agnostic, read-oriented projection for external tools. V1 proves the boundary with fixtures; it is not a save format, a runtime snapshot, or a transport protocol. It must not expose Unity objects, runtime classes, internal Stores, persistence receipts, mutation epochs, hydration details, or continuation state.
+World Exchange is a renderer-agnostic, read-oriented projection for external tools. V1 was first proven with fixtures and can now be carried as a portable JSON artifact; it is not a save format or runtime snapshot. It must not expose Unity objects, runtime classes, internal Stores, persistence receipts, mutation epochs, hydration details, or continuation state.
 
 ## Versioning and compatibility
 
@@ -28,6 +28,17 @@ V1 supports:
 - General relationships with source and target IDs, a type, and optional description/public metadata. Endpoints may be any supported entity type, not only people.
 
 See exported TypeScript contracts for exact optionality and validation behavior.
+
+## Portable JSON artifacts
+
+The `world-io` package reads and writes normal UTF-8 JSON World Exchange v1
+documents using the `*.world.json` convention. It delegates entity validation
+to this schema, rejects malformed or unsupported input without repair, and
+does not generate missing identity or labels. Serialization sorts object keys
+recursively while preserving array order. The file is a potentially stale
+exchange artifact, not persistence or a mutable canonical database. See
+[Portable World Exchange](PORTABLE_WORLD_EXCHANGE.md) for the API, consumer
+flows, and compatibility behavior.
 
 ## Relationship rules
 

@@ -4,6 +4,7 @@ import {
   syncWorldMarkdown,
   type MarkdownVaultAdapter,
 } from "@simulation-external/world-markdown";
+import { syncWorldExchangeFile } from "./world-import.js";
 
 export default class SimulationExternalWorldMarkdownPlugin extends Plugin {
   onload(): void {
@@ -11,6 +12,11 @@ export default class SimulationExternalWorldMarkdownPlugin extends Plugin {
       id: "sync-demo-world-markdown",
       name: "Sync bundled world fixture to Markdown notes",
       callback: () => void this.syncFixture(),
+    });
+    this.addCommand({
+      id: "import-world-exchange-file",
+      name: "Import World Exchange file to Markdown notes",
+      callback: () => this.chooseWorldExchangeFile(),
     });
   }
 
@@ -24,6 +30,41 @@ export default class SimulationExternalWorldMarkdownPlugin extends Plugin {
     } catch (error) {
       const detail = error instanceof Error ? error.message : String(error);
       new Notice(`World Markdown sync failed: ${detail}`);
+    }
+  }
+
+  private chooseWorldExchangeFile(): void {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".world.json,application/json";
+    input.setAttribute("aria-label", "World Exchange file");
+    input.style.display = "none";
+    input.addEventListener("cancel", () => input.remove(), { once: true });
+    input.addEventListener(
+      "change",
+      () => {
+        const file = input.files?.[0];
+        input.remove();
+        if (file) void this.syncPortableFile(file);
+      },
+      { once: true },
+    );
+    document.body.appendChild(input);
+    input.click();
+  }
+
+  private async syncPortableFile(file: File): Promise<void> {
+    try {
+      const result = await syncWorldExchangeFile(
+        await file.arrayBuffer(),
+        this.createVaultAdapter(),
+      );
+      new Notice(
+        `${file.name}: ${result.created.length} created, ${result.updated.length} updated, ${result.unchanged.length} unchanged.`,
+      );
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      new Notice(`World Exchange import failed: ${detail}`);
     }
   }
 

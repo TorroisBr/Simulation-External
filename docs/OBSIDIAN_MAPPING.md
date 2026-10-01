@@ -27,6 +27,14 @@ Each generated note includes `simulation_id`, `simulation_world_id`, `simulation
 
 The adapter owns its four Simulation metadata keys and the content between `<!-- simulation-external:generated:start -->` and `<!-- simulation-external:generated:end -->`. It may carefully update those owned frontmatter values while preserving unrelated keys and comments. It does not own the title, prose outside the generated markers, GM Notes, or other user-authored vault content. See [Sync Model](SYNC_MODEL.md) for update behavior and conflict handling.
 
+The plugin can source the exchange from either the bundled fixture or a
+manually selected `*.world.json` file. Portable files are parsed and validated
+by `world-io` before they reach the same Markdown renderer and synchronization
+path. Import does not change stable-ID mapping or ownership rules; an
+identity conflict leaves the affected note unchanged and reports an error.
+The selected file is not a canonical authoring source and is never written
+back to Simulation. See [Portable World Exchange](PORTABLE_WORLD_EXCHANGE.md).
+
 ## Renames and collisions
 
 Stable-ID filenames keep paths unchanged when display names change or are absent; synchronization updates the generated heading and links using supplied labels or consumer fallbacks while retaining user sections. If multiple files claim the same ID, stop and report an ambiguity rather than choosing one. If an ID-derived path is occupied by a different ID, report the collision and leave the occupant untouched. Path cleanup must never delete user files automatically. A future multi-world vault mapping may add a world-ID namespace to these paths after its ownership behavior is specified.

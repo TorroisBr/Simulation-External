@@ -2,13 +2,15 @@
   "name": "@simulation-external/obsidian-plugin",
   "version": "0.1.0",
   "private": true,
-  "description": "Obsidian plugin for exporting the bundled Simulation world fixture to Markdown.",
+  "description": "Obsidian plugin for syncing fixture and portable World Exchange data to Markdown.",
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "build": "node esbuild.config.mjs"
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "build": "node esbuild.config.mjs",
+    "test": "pnpm --filter @simulation-external/world-schema build && pnpm --filter @simulation-external/world-io build && pnpm --filter @simulation-external/world-fixtures build && pnpm --filter @simulation-external/world-markdown build && vitest run"
   },
   "dependencies": {
     "@simulation-external/world-fixtures": "workspace:*",
+    "@simulation-external/world-io": "workspace:*",
     "@simulation-external/world-markdown": "workspace:*"
   },
   "devDependencies": {

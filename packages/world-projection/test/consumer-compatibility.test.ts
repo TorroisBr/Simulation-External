@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 import { worldFixture } from "@simulation-external/world-fixtures";
 import { renderWorldMarkdownNotes } from "@simulation-external/world-markdown";
 import {
+  parseWorldExchange,
+  serializeWorldExchange,
+} from "@simulation-external/world-io";
+import {
   collectionEntries,
   entityName,
   worldName,
@@ -41,6 +45,21 @@ describe("World Exchange consumer compatibility", () => {
     );
     expect(personNote?.content).toContain("### Related notes");
     expect(personNote?.content).not.toContain("actorKnowledgeByPerson");
+  });
+
+  it("passes projection output through portable I/O and back to the same consumers", () => {
+    const result = projectWorldExchange(createConsumerCompatibilityMock());
+    if (!result.exchange)
+      throw new Error("Expected a complete fixture-backed exchange");
+
+    const loaded = parseWorldExchange(serializeWorldExchange(result.exchange));
+    expect(loaded).toEqual(result.exchange);
+    expect(renderWorldMarkdownNotes(loaded)).toEqual(
+      renderWorldMarkdownNotes(result.exchange),
+    );
+    expect(collectionEntries(loaded, "people")).toEqual(
+      collectionEntries(result.exchange, "people"),
+    );
   });
 
   it("renders stable identities when optional World Exchange labels are absent", () => {

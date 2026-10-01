@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Simulation-External provides external tools and projection surfaces for the Simulation ecosystem. Its initial consumers are the Web World Explorer and an Obsidian plugin. The current data source is a validated fixture world.
+Simulation-External provides external tools and projection surfaces for the Simulation ecosystem. Its initial consumers are the Web World Explorer and an Obsidian plugin. The bundled validated fixture remains the demo source; both consumers can also load a portable World Exchange artifact.
 
 ## Architectural relationship
 
@@ -21,18 +21,21 @@ Simulation-External is separate from Simulation core and cannot redefine canonic
 ## Current structure
 
 - `packages/world-schema` owns renderer-agnostic World Exchange v1 types, ID/reference rules, indexes, and runtime validation.
+- `packages/world-io` parses and validates portable World Exchange JSON through `world-schema` and serializes deterministic `*.world.json` artifacts.
 - `packages/world-fixtures` provides the validated fictional world shared by apps and tests.
 - `packages/world-projection` prototypes a read-only candidate-facts adapter into World Exchange using External-owned mocks; it has no Simulation source implementation.
 - `packages/world-markdown` renders deterministic notes and safely merges generated content outside Obsidian.
-- `apps/web` presents the fixture through the World Explorer.
-- `apps/obsidian-plugin` adapts the same exchange to an Obsidian vault and invokes the shared Markdown package.
+- `apps/web` presents either the fixture or a locally loaded portable exchange through the World Explorer.
+- `apps/obsidian-plugin` adapts the fixture or a manually imported portable exchange to an Obsidian vault and invokes the shared Markdown package.
 - Root tooling provides the pnpm workspace, strict TypeScript configuration, ESLint, Vitest, and Prettier.
 
 ## World Exchange
 
-The current contract is schema version 1. Entity identity uses stable, non-empty IDs; references are explicit IDs and are validated against the exchange. World is a required scope object with a required ID; World and entity display names are optional and consumers provide fallbacks. Domain kinds/types, HistoricalEvent title/time, and Relationship endpoints/type remain required. Supported categories are World, Person, City, Location, Organization, Institution, Faction, Item, HistoricalEvent, and Relationship. Relationship endpoints may refer to any supported entity category. Runtime validation is applied to the fixture. Fixtures remain the integration source until an explicit projection contract exists.
+The current contract is schema version 1. Entity identity uses stable, non-empty IDs; references are explicit IDs and are validated against the exchange. World is a required scope object with a required ID; World and entity display names are optional and consumers provide fallbacks. Domain kinds/types, HistoricalEvent title/time, and Relationship endpoints/type remain required. Supported categories are World, Person, City, Location, Organization, Institution, Faction, Item, HistoricalEvent, and Relationship. Relationship endpoints may refer to any supported entity category. Runtime validation applies to fixtures and portable files. Fixtures and the External-only prototype remain the only implemented producer sources; no Simulation exporter contract exists.
 
 See [World Exchange v1](WORLD_EXCHANGE.md) for field and compatibility rules.
+See [Portable World Exchange](PORTABLE_WORLD_EXCHANGE.md) for JSON parsing,
+serialization, consumer loading, and artifact authority limits.
 
 ## Obsidian model
 
@@ -42,11 +45,11 @@ See [Obsidian Mapping](OBSIDIAN_MAPPING.md) and [Sync Model](SYNC_MODEL.md).
 
 ## Web model
 
-The Web Explorer provides world overview, global search, entity lists and details, related-entity navigation, and historical-event browsing. It consumes `world-schema` and `world-fixtures`; display-derived state belongs in the Web layer. The Web app must not redefine World Exchange entity types.
+The Web Explorer provides world overview, global search, entity lists and details, related-entity navigation, and historical-event browsing. It consumes the shared `WorldExchange` value from either `world-fixtures` or `world-io`; display-derived state belongs in the Web layer. The Web app must not redefine World Exchange entity types.
 
 ## Integration status
 
-**Implemented:** World Exchange schema and validation; fixture world; Web consumer; deterministic Markdown transformation and sync safeguards; Obsidian fixture export prototype; External-only, fixture-backed projection boundary prototype with omission reporting and consumer compatibility tests.
+**Implemented:** World Exchange schema and validation; fixture world; Web consumer with local portable-file loading; deterministic Markdown transformation and sync safeguards; Obsidian fixture and portable-file import; deterministic `world-io` JSON parsing/serialization; External-only, fixture-backed projection boundary prototype with omission reporting and consumer compatibility tests.
 
 **Not implemented:** a real Simulation exporter or Simulation-owned source contract; live IPC; runtime mutation; P12 save consumption; Mod API; live bidirectional synchronization.
 
@@ -58,7 +61,7 @@ Authorized Simulation source studies use the ignored local `.references/Simulati
 
 ## Current roadmap stage
 
-Stages A (schema and fixtures), B (Web Explorer), and C (Obsidian export/sync prototype) are implemented. Stage D has a corrected read-only projection study, an External-only fixture-backed boundary prototype, and a completed Stage D.1 contract pressure review. The v1 label optionality change does not supply Simulation-side World identity or a source contract, so no real exporter exists. Runtime exporter implementation requires explicit coordination and authorization. Stages E and F remain future work.
+Stages A (schema and fixtures), B (Web Explorer), and C (Obsidian export/sync prototype) are implemented. Stage D has a corrected read-only projection study, an External-only fixture-backed boundary prototype, a completed Stage D.1 contract pressure review, and implemented Stage D.2 portable World Exchange consumers. The v1 label optionality change and portable-file support do not supply Simulation-side World identity or a source contract, so no real exporter exists. Runtime exporter implementation requires explicit coordination and authorization. Stages E and F remain future work.
 
 ## Validation
 

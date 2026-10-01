@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Clock3,
   Compass,
+  FileUp,
   Globe2,
   Landmark,
   MapPin,
@@ -21,6 +22,7 @@ import {
 } from "lucide-react";
 import { worldFixture } from "@simulation-external/world-fixtures";
 import type { WorldExchange } from "@simulation-external/world-schema";
+import { parseWorldExchange } from "@simulation-external/world-io";
 import {
   allEntities,
   asText,
@@ -45,8 +47,7 @@ import {
 } from "./lib/world";
 
 type MainView = "overview" | "timeline" | CollectionKey;
-
-const world: WorldExchange = worldFixture;
+type ExchangeSource = "fixture" | "portable-file";
 
 const iconFor = (icon: string, size = 16) => {
   const props = { size, strokeWidth: 1.8 };
@@ -79,6 +80,8 @@ function keyOf(entry: EntityEntry): string {
 }
 
 function App() {
+  const [world, setWorld] = useState<WorldExchange>(worldFixture);
+  const [source, setSource] = useState<ExchangeSource>("fixture");
   const [view, setView] = useState<MainView>("overview");
   const [selected, setSelected] = useState<EntityEntry | null>(null);
   const [query, setQuery] = useState("");
@@ -86,15 +89,18 @@ function App() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [historyStack, setHistoryStack] = useState<EntityEntry[]>([]);
   const searchInput = useRef<HTMLInputElement>(null);
+  const worldFileInput = useRef<HTMLInputElement>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadingFile, setLoadingFile] = useState(false);
 
-  const entities = useMemo(() => allEntities(world), []);
+  const entities = useMemo(() => allEntities(world), [world]);
   const results = useMemo(
     () => searchEntities(world, query).slice(0, 8),
-    [query],
+    [world, query],
   );
   const eventEntries = useMemo(
     () => sortEvents(collectionEntries(world, "historicalEvents")),
-    [],
+    [world],
   );
 
   useEffect(() => {
@@ -140,6 +146,41 @@ function App() {
     setView(next);
     setSelected(null);
     setMobileNavOpen(false);
+  };
+
+  const useDemoFixture = () => {
+    setWorld(worldFixture);
+    setSource("fixture");
+    setLoadError(null);
+    setView("overview");
+    setSelected(null);
+    setHistoryStack([]);
+    setQuery("");
+    setSearchOpen(false);
+  };
+
+  const loadWorldFile = async (event: ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file) return;
+
+    setLoadError(null);
+    setLoadingFile(true);
+    try {
+      const exchange = parseWorldExchange(await file.arrayBuffer());
+      setWorld(exchange);
+      setSource("portable-file");
+      setView("overview");
+      setSelected(null);
+      setHistoryStack([]);
+      setQuery("");
+      setSearchOpen(false);
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setLoadingFile(false);
+    }
   };
 
   return (
@@ -327,7 +368,9 @@ function App() {
             </div>
             <div className="footer-world-copy">
               <strong>{worldName(world)}</strong>
-              <span>Fixture workspace</span>
+              <span>
+                {source === "fixture" ? "Fixture workspace" : "Local JSON file"}
+              </span>
             </div>
             <button
               aria-label="Workspace options"
@@ -370,8 +413,40 @@ function App() {
               >
                 <Sparkles size={14} /> Explore
               </button>
+              <button
+                className="quiet-button"
+                type="button"
+                onClick={() => worldFileInput.current?.click()}
+                disabled={loadingFile}
+                aria-label="Load World Exchange file"
+              >
+                <FileUp size={14} /> {loadingFile ? "Loading…" : "Load file"}
+              </button>
+              {source === "portable-file" && (
+                <button
+                  className="quiet-button"
+                  type="button"
+                  onClick={useDemoFixture}
+                >
+                  Use demo fixture
+                </button>
+              )}
+              <input
+                ref={worldFileInput}
+                className="file-input-hidden"
+                type="file"
+                accept=".world.json,application/json"
+                aria-label="World Exchange file"
+                onChange={(event) => void loadWorldFile(event)}
+              />
             </div>
           </div>
+          {loadError && (
+            <div className="load-error" role="alert">
+              <strong>Could not load World Exchange file</strong>
+              <span>{loadError}</span>
+            </div>
+          )}
           <div className="content-scroll">
             {view === "overview" ? (
               <Overview
@@ -383,12 +458,14 @@ function App() {
               />
             ) : view === "timeline" ? (
               <Timeline
+                world={world}
                 events={eventEntries}
                 selected={selected}
                 onSelect={selectEntry}
               />
             ) : (
               <CollectionView
+                world={world}
                 collection={view}
                 selected={selected}
                 onSelect={selectEntry}
@@ -406,7 +483,11 @@ function App() {
               onClose={() => setSelected(null)}
             />
           ) : (
-            <WelcomePanel world={world} onSelect={selectEntry} />
+            <WelcomePanel
+              world={world}
+              source={source}
+              onSelect={selectEntry}
+            />
           )}
         </aside>
       </div>
@@ -629,16 +710,18 @@ function Overview({
 }
 
 function CollectionView({
+  world: exchange,
   collection,
   selected,
   onSelect,
 }: {
+  world: WorldExchange;
   collection: CollectionKey;
   selected: EntityEntry | null;
   onSelect: (entry: EntityEntry) => void;
 }) {
   const meta = collectionMeta(collection);
-  const entries = collectionEntries(world, collection);
+  const entries = collectionEntries(exchange, collection);
   const [filter, setFilter] = useState("");
   const visible = entries.filter(({ entity }) =>
     `${entityName(entity)} ${entityDescription(entity) ?? ""}`
@@ -655,7 +738,7 @@ function CollectionView({
           <h1>{meta.label}</h1>
           <p>
             Browse and connect the {meta.label.toLocaleLowerCase()} in{" "}
-            {worldName(world)}.
+            {worldName(exchange)}.
           </p>
         </div>
         <span className={`collection-hero-icon ${meta.color}`}>
@@ -684,6 +767,7 @@ function CollectionView({
           {visible.map((entry, index) => (
             <EntityCard
               key={keyOf(entry)}
+              world={exchange}
               entry={entry}
               index={index}
               active={selected ? keyOf(selected) === keyOf(entry) : false}
@@ -711,11 +795,13 @@ function CollectionView({
 }
 
 function EntityCard({
+  world: exchange,
   entry,
   index,
   active,
   onClick,
 }: {
+  world: WorldExchange;
   entry: EntityEntry;
   index: number;
   active: boolean;
@@ -745,7 +831,7 @@ function EntityCard({
         <h3>{entityName(entry.entity)}</h3>
         <p>
           {description ??
-            `Discover how this ${meta.singular.toLocaleLowerCase()} fits into ${worldName(world)}.`}
+            `Discover how this ${meta.singular.toLocaleLowerCase()} fits into ${worldName(exchange)}.`}
         </p>
         <span className="entity-card-link">
           View details <ArrowUpRight size={14} />
@@ -756,10 +842,12 @@ function EntityCard({
 }
 
 function Timeline({
+  world: exchange,
   events,
   selected,
   onSelect,
 }: {
+  world: WorldExchange;
   events: EntityEntry[];
   selected: EntityEntry | null;
   onSelect: (entry: EntityEntry) => void;
@@ -774,7 +862,7 @@ function Timeline({
             <span className="eyebrow-line" /> THE STORY SO FAR
           </div>
           <h1>Timeline</h1>
-          <p>Explore the moments that shaped {worldName(world)}.</p>
+          <p>Explore the moments that shaped {worldName(exchange)}.</p>
         </div>
         <span className="collection-hero-icon pink">
           <Clock3 size={24} />
@@ -950,9 +1038,11 @@ function DetailsPanel({
 
 function WelcomePanel({
   world: exchange,
+  source,
   onSelect,
 }: {
   world: WorldExchange;
+  source: ExchangeSource;
   onSelect: (entry: EntityEntry) => void;
 }) {
   const featured =
@@ -963,7 +1053,7 @@ function WelcomePanel({
       <div className="inspector-top">
         <span className="inspector-label">YOUR FIELD GUIDE</span>
         <span className="fixture-badge">
-          <span /> FIXTURE
+          <span /> {source === "fixture" ? "FIXTURE" : "PORTABLE FILE"}
         </span>
       </div>
       <div className="guide-art">

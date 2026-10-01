@@ -34,6 +34,16 @@ The Markdown package is deterministic: the same exchange and mapping configurati
 
 Simulation projection data is read-only in the initial integration. A changed generated block is expected and replaceable; user-authored content is not. If file ownership or markers cannot be determined safely, leave the file unchanged and surface a diagnostic. Do not silently overwrite manually authored sections. This model does not yet resolve edits back into Simulation.
 
+## Portable World Exchange source
+
+The plugin may sync either its bundled fixture or a user-selected local
+`*.world.json` artifact. `world-io` validates the artifact before the shared
+Markdown sync runs, so both sources use the same identity and conflict rules.
+The JSON is a read projection and may be stale; importing it into a vault does
+not make Obsidian the canonical source and does not create a write-back path
+to Simulation. Invalid input is rejected without repair. See
+[Portable World Exchange](PORTABLE_WORLD_EXCHANGE.md).
+
 ## Future import direction
 
 Controlled authoring/import is a separate future stage requiring explicit field ownership, conflict policy, validation, permissions, and a Simulation-side contract. There are no live mutation commands or bidirectional synchronization in this foundation.
