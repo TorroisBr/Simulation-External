@@ -1,0 +1,23 @@
+{
+  "name": "@simulation-external/world-schema",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Shared, runtime-agnostic world exchange schema and validation.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "test": "vitest run"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

@@ -14,7 +14,7 @@ Every entity has a stable, non-empty string `id`, unique within one world payloa
 
 ## V1 shape
 
-A payload contains schema version, world metadata, and collections for people, cities, locations, organizations, institutions, factions, items, historical events, and relationships. The world metadata has its own stable ID, name, and optional description/tags. Shared entity fields include stable ID, display name, optional description/tags, and optional public metadata.
+A payload contains schema version, world metadata, and collections for people, cities, locations, organizations, institutions, factions, items, historical events, and relationships. World metadata has a stable ID and name, and may include era, description, tags, and JSON metadata. Every entity has a stable ID and may include tags and JSON metadata; each entity type adds its own display name or title and optional descriptive fields.
 
 V1 supports:
 
@@ -23,8 +23,8 @@ V1 supports:
 - Locations with optional parent/city references and a kind suitable for display.
 - Organizations and institutions with optional city/location and member references.
 - Factions with member references.
-- Items with optional owner and location references.
-- Historical events with an ISO date/time string, title, description, participant IDs, location IDs, and related entity IDs.
+- Items with optional owner and location references. `ownerId` may reference any supported entity type.
+- Historical events with a title, a required finite `year` or non-empty `occurredAt` date/time string, optional description, participant IDs, location IDs, and related entity IDs.
 - General relationships with source and target IDs, a type, and optional description/public metadata. Endpoints may be any supported entity type, not only people.
 
 See exported TypeScript contracts for exact optionality and validation behavior.

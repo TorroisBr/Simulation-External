@@ -1,4 +1,5 @@
 node_modules/
+.pnpm-store/
 dist/
 coverage/
 .vite/
@@ -9,3 +10,4 @@ coverage/
 *.log
 .DS_Store
 Thumbs.db
+apps/obsidian-plugin/main.js

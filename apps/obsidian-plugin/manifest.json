@@ -1,0 +1,9 @@
+{
+  "id": "simulation-external-world-markdown",
+  "name": "Simulation External World Markdown",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Export the bundled Simulation world fixture as editable, synchronizable Markdown notes.",
+  "author": "Simulation External",
+  "isDesktopOnly": false
+}

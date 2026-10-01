@@ -19,10 +19,11 @@ Requires Node.js current LTS and pnpm.
 
 ```sh
 pnpm install
+pnpm build
 pnpm typecheck
 pnpm lint
 pnpm test
-pnpm build
+pnpm format:check
 ```
 
 The web app can be started with `pnpm --filter @simulation-external/web dev`. Plugin packaging and installation are documented in `apps/obsidian-plugin/README.md` when available.
