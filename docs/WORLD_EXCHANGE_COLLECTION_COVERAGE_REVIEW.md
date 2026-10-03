@@ -37,3 +37,28 @@ that distinction in both the state table and artifact-scope rules.
 This record documents a contract-design gate only. It is not a Simulation
 source-owner approval, a runtime exporter authorization, or proof that any
 Simulation collection can currently be projected.
+
+## Implementation exact-tip review
+
+**Reviewed implementation tip:**
+
+`a3f2edaa42aeb9b1cff8b37635f988cf9b8bf64f`
+
+**Outcome:** PASS after one projection correctness fix.
+
+The first exact-tip implementation review found that an affiliation with an
+unprojectable Person or Faction endpoint could be skipped while the adapter
+still emitted empty or partial reciprocal `Faction.memberIds` and
+`Person.factionIds` arrays. The implementation now omits both optional fields
+across the projected entities whenever any active affiliation endpoint cannot
+be represented, and it does not initialize `memberIds` as an empty array.
+Regression coverage includes People deliberately not included and an
+unavailable Faction endpoint alongside a valid edge; the latter asserts both
+reciprocal fields are omitted.
+
+The final read-only architecture-conformance review passed at the exact tip
+above with no remaining findings. The reviewer also confirmed the existing
+v1/v2 compatibility, coverage validation, deterministic I/O, consumer
+behavior, Obsidian authorship safeguards, and Simulation/P12/runtime
+separation. This review is not Simulation source-owner approval or exporter
+authorization.
