@@ -463,7 +463,6 @@ function projectFaction(
     ...(isPresent(candidate.publicName)
       ? { name: candidate.publicName.trim() }
       : {}),
-    memberIds: [],
   };
 }
 
@@ -473,6 +472,7 @@ function projectActiveAffiliations(
   factions: Map<string, Faction>,
   omissions: ProjectionOmission[],
 ): void {
+  let incompleteMembership = false;
   const ordered = [...affiliations].sort(
     (left, right) =>
       compareStrings(left.factionSourceId, right.factionSourceId) ||
@@ -490,16 +490,25 @@ function projectActiveAffiliations(
         message:
           "An active affiliation endpoint is omitted because its Person or Faction identity is not projectable.",
       });
+      incompleteMembership = true;
       continue;
     }
-    if (!faction.memberIds!.includes(person.id))
-      faction.memberIds!.push(person.id);
+    faction.memberIds = faction.memberIds ?? [];
+    if (!faction.memberIds.includes(person.id))
+      faction.memberIds.push(person.id);
     person.factionIds = person.factionIds ?? [];
     if (!person.factionIds.includes(faction.id))
       person.factionIds.push(faction.id);
   }
+  if (incompleteMembership) {
+    // The direct arrays have no partial-coverage marker. Remove both sides
+    // rather than serializing empty or partial membership as factual absence.
+    for (const faction of factions.values()) delete faction.memberIds;
+    for (const person of people.values()) delete person.factionIds;
+    return;
+  }
   for (const faction of factions.values())
-    faction.memberIds!.sort(compareStrings);
+    faction.memberIds?.sort(compareStrings);
   for (const person of people.values()) person.factionIds?.sort(compareStrings);
 }
 

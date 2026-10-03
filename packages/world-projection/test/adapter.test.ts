@@ -169,6 +169,33 @@ describe("read-only World Exchange projection prototype", () => {
     expect(exchange.organizations).toEqual([]);
   });
 
+  it("omits reciprocal membership fields when an affiliation endpoint is outside the projected collections", () => {
+    const source = createConsumerCompatibilityMock();
+    const peopleOmitted = {
+      ...source,
+      readCollectionCoverage: () => ({
+        ...source.readCollectionCoverage(),
+        people: "NOT_INCLUDED" as const,
+      }),
+      readPeople: () => [],
+    };
+    const result = projectWorldExchange(peopleOmitted);
+    const exchange = result.exchange;
+    if (!exchange || exchange.schemaVersion !== 2)
+      throw new Error("Expected a valid v2 artifact with omitted people");
+
+    expect(exchange.collectionCoverage.people).toBe("NOT_INCLUDED");
+    expect(exchange.people).toEqual([]);
+    expect(exchange.factions[0]?.memberIds).toBeUndefined();
+    expect(result.omissions).toContainEqual(
+      expect.objectContaining({
+        concept: "Faction",
+        code: "reference-not-projectable",
+        field: "memberIds",
+      }),
+    );
+  });
+
   it("does not expose actor Knowledge or aggregate inventory quantities", () => {
     const source = createConsumerCompatibilityMock();
     const result = projectWorldExchange(source);
