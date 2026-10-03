@@ -196,6 +196,37 @@ describe("read-only World Exchange projection prototype", () => {
     );
   });
 
+  it("omits both reciprocal membership fields when a projected Person has an unavailable Faction endpoint", () => {
+    const source = createConsumerCompatibilityMock();
+    const factionEndpointUnavailable = {
+      ...source,
+      readActiveFactionAffiliations: () => [
+        {
+          factionSourceId: "fixture-faction:harbor",
+          personSourceId: "fixture-person:lyra",
+        },
+        {
+          factionSourceId: "fixture-faction:unavailable",
+          personSourceId: "fixture-person:lyra",
+        },
+      ],
+    };
+    const result = projectWorldExchange(factionEndpointUnavailable);
+    const exchange = result.exchange;
+    if (!exchange)
+      throw new Error("Expected a valid v2 artifact with omitted membership");
+
+    expect(exchange.people[0]?.factionIds).toBeUndefined();
+    expect(exchange.factions[0]?.memberIds).toBeUndefined();
+    expect(result.omissions).toContainEqual(
+      expect.objectContaining({
+        concept: "Faction",
+        code: "reference-not-projectable",
+        field: "memberIds",
+      }),
+    );
+  });
+
   it("does not expose actor Knowledge or aggregate inventory quantities", () => {
     const source = createConsumerCompatibilityMock();
     const result = projectWorldExchange(source);
