@@ -1,17 +1,22 @@
 # Simulation Entity Mapping
 
-This document maps World Exchange v1 against promoted Simulation architecture after the [Stage D.1 contract pressure review](WORLD_EXCHANGE_CONTRACT_PRESSURE_REVIEW.md). The previous mapping used Simulation main at 002a55859544d1e26247c274e6d52590fa671a90. Its findings are superseded by the canonical refs listed in [the projection study](SIMULATION_PROJECTION_STUDY.md). Classifications describe concept mapping, not exporter readiness.
+This document maps the World Exchange v1 entity fields against promoted Simulation architecture after the [Stage D.1 contract pressure review](WORLD_EXCHANGE_CONTRACT_PRESSURE_REVIEW.md). The previous mapping used Simulation main at 002a55859544d1e26247c274e6d52590fa671a90. Its findings are superseded by the canonical refs listed in [the projection study](SIMULATION_PROJECTION_STUDY.md). Classifications describe concept mapping, not exporter readiness.
 
-## World — BLOCKED_BY_CURRENT_ARCHITECTURE
+World Exchange v2 keeps these entity fields and adds whole-World collection
+coverage. These source-readiness classifications do not establish complete
+enumeration or a compatible cross-collection read cut. A real producer must
+meet the additional [coverage contract and exporter prerequisites](WORLD_EXCHANGE_COLLECTION_COVERAGE.md).
 
-- Authoritative sources: Phase 9 owns a selected authored bootstrap profile and provenance. SimulationConfigData and the initialized runtime provide configuration/run context. No canonical World domain record or World identity contract was found.
-- Stable identity: None for a World. Profile/configuration label, seed, Unity asset identity, or runtime object is not a stable World ID.
-- Safe facts: No complete World entity. An authored profile name could be an optional display candidate only after Simulation defines whether that profile denotes a World. Do not emit it as identity or infer era/description.
-- Derivable relationships: An authored profile composes selected City/geography inputs, but that is profile composition, not a proven World-to-City domain relation for all worlds.
-- Derived/presentation-only: SimulationConfigData.simulationName, profile names, seed, module configuration, diagnostics, and logging describe authoring or execution; they are not automatically World metadata.
-- Knowledge: Do not aggregate Person, Institution, or Faction Knowledge into World metadata.
-- Missing/ambiguous: World versus scenario/configuration/runtime meaning; stable identity and lifecycle; multi-profile worlds; as-of time. A display name is optional in World Exchange and cannot resolve the identity gap.
-- Adapter: Required after Simulation chooses a World authority and stable ID. Until then a valid v1 payload cannot be emitted.
+## World — PARTIALLY_SUPPORTED
+
+- Authoritative sources: Promoted WI-A defines and allocates a `WorldId` for a newly composed causal World before publication. `SimulationBootstrapComposition` and `SimulationRuntime` share that typed identity. Authored profiles and `SimulationConfigData` remain bootstrap/configuration inputs, not World identity owners.
+- Stable identity: `WorldId.Value` is canonical `world:<32 lowercase hexadecimal digits>`, constructed from a non-empty GUID. It identifies a causal World continuation; it is not a profile, seed, content fingerprint, save file, or runtime instance ID.
+- Safe facts: `WorldId` is the only currently established World fact that maps to the required World Exchange `world.id`, subject to an approved External ID mapping. World `name`, `era`, `description`, and tags are optional in the contract but have no approved Simulation source here; omit them.
+- Derivable relationships: World scope anchors its collections, but no universal World-to-City relationship list or recursive World graph is established. Do not derive one from profile composition.
+- Derived/presentation-only: `SimulationConfigData.simulationName`, profile names, seed, module configuration, diagnostics, and logging describe authoring or execution; they are not automatically World metadata.
+- Knowledge: World identity is not an aggregate of Person, Institution, or Faction Knowledge. Do not promote actor-held beliefs or derived views into World truth.
+- Missing/ambiguous: Simulation has a stable identity, but External has no approved read port or public ID mapping to expose it. Compatibility for older/migrated Worlds without WI-A identity, display-name authority, and any as-of/freshness contract remain unresolved. V2 whole-World collection coverage also requires separate enumeration/read-cut proof.
+- Adapter: Required. After Simulation approves a read path, it must map the source-owned `WorldId` deterministically to `world.id`; it must not infer identity from a profile, name, seed, or persistence record.
 
 ## Person — PARTIALLY_SUPPORTED
 
@@ -76,7 +81,7 @@ This document maps World Exchange v1 against promoted Simulation architecture af
 - Derivable relationships: Current affiliation derives Faction.memberIds and matching Person.factionIds. Ended records are historical, not current membership. Membership does not imply support, loyalty, Knowledge, or Knowledge propagation.
 - Derived/presentation-only: Membership policy, expulsion permission, legitimacy, support, recognition, political position, and diagnostic ordering are not Faction ideology or description.
 - Knowledge: Faction-held political Knowledge is an independent Faction perspective, not membership truth and not copied to Persons.
-- Missing/ambiguous: Optional ideology and City/Organization associations are absent but v1 does not require them. The read port, reciprocal membership-field policy, and World identity remain cross-cutting prerequisites for a complete exchange.
+- Missing/ambiguous: Optional ideology and City/Organization associations are absent but v1 does not require them. The read port, reciprocal membership-field policy, WorldId-to-External-ID mapping, compatible source cut, and v2 collection coverage remain cross-cutting prerequisites for a complete exchange.
 - Adapter: Required. It maps stable FactionId even when no display name exists, includes a source-owned name only when supplied, and reads current membership only from active affiliation facts. It must not fabricate a fallback.
 
 ## Item — PARTIALLY_SUPPORTED

@@ -13,7 +13,7 @@ Simulation canonical facts (future, coordinated source)
                          ↓
               approved read/projection adapter
                          ↓
-                 World Exchange v1
+                 World Exchange v1 or v2
                          ↓
           optional portable JSON via `world-io`
              ↙             ↓             ↘
@@ -36,9 +36,9 @@ Dependency direction flows from consumers and tooling toward the contract. Reusa
 
 ## External surface and future integration
 
-The first exchange is read-only and fixture-backed. `world-projection` demonstrates a fixture-backed adapter boundary and explicit omissions; its source contract is not Simulation-owned and it does not read Simulation. World Exchange v1 requires a World scope ID but permits absent display names on World and entity records; public domain type, event, and relationship fields remain required where they carry meaning. The Stage D.1 review documents the field decisions. A future read-only exporter needs an explicit contract owned or reviewed with Simulation core before any runtime integration is attempted. It must transform selected public domain data into the exchange instead of exposing runtime objects. IPC, sockets, an in-process REST server, save loading/editing, memory inspection, and live mutation are outside this foundation.
+The exchange is read-only and fixture-backed. `world-projection` demonstrates an External-only adapter boundary and explicit coverage/omission behavior; its source contract is not Simulation-owned and it does not read Simulation. V1 requires a World scope ID but permits absent display names on World and entity records; v2 keeps the entity shape and requires collection-coverage declarations. Public domain type, event, and relationship fields remain required where they carry meaning. Stage D.1 records field decisions; Stage D.4 records the collection-coverage evolution. A future read-only exporter needs an explicit contract owned or reviewed with Simulation core before runtime integration is attempted. It must transform selected public domain data into the exchange instead of exposing runtime objects. IPC, sockets, an in-process REST server, save loading/editing, memory inspection, and live mutation are outside this foundation.
 
-`world-io` now serializes valid v1 exchanges to deterministic UTF-8 JSON and parses local artifacts through the canonical schema validator without repair. The `*.world.json` file is a potentially stale exchange artifact, not P12 persistence or an authority source. See [Portable World Exchange](PORTABLE_WORLD_EXCHANGE.md).
+`world-io` serializes valid v1 and v2 exchanges to deterministic UTF-8 JSON and parses local artifacts through the canonical schema validator without repair. Updated consumers treat v1 collection completeness as undeclared and preserve its version; v2 carries explicit producer-declared coverage. The `*.world.json` file is a potentially stale exchange artifact, not P12 persistence or an authority source. See [Portable World Exchange](PORTABLE_WORLD_EXCHANGE.md).
 
 ## Consumer architecture
 

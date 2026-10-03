@@ -11,7 +11,7 @@ Simulation-External defines and supports language-neutral exchange contracts
 and reusable tools around those contracts. A developer can consume a
 portable World Exchange document without running this repository's apps, a
 central service, or Simulation. The file format and
-[World Exchange v1 specification](WORLD_EXCHANGE.md) are the interoperability
+[World Exchange v1 and v2 specification](WORLD_EXCHANGE.md) are the interoperability
 contract. TypeScript packages are optional conveniences for consumers that
 want the provided parser, validator, serializers, or adapters.
 
@@ -22,7 +22,7 @@ Simulation canonical facts (future, coordinated source)
                          ↓
               approved read/projection adapter
                          ↓
-             World Exchange v1 document
+             World Exchange v1 or v2 document
                          ↓
              optional `world-io` tooling
               ↙          ↓          ↘
@@ -37,14 +37,14 @@ publication and a package distribution policy have not been established.
 
 ## Platform layers
 
-| Layer                             | Package or surface                      | Role and stability                                                                                                                                                                                 |
-| --------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Contract**                      | `@simulation-external/world-schema`     | World Exchange v1 types, stable ID/reference shape, validation semantics, and indexes. This owns the typed contract; its wire compatibility is governed by `schemaVersion`.                        |
-| **Core tooling**                  | `@simulation-external/world-io`         | UTF-8 JSON parsing, schema validation, and deterministic serialization. It depends at runtime only on `world-schema`; it does not map domain sources or define a second schema.                    |
-| **Integration / adapter tooling** | `@simulation-external/world-projection` | Experimental External-only candidate-facts adapter prototype. It demonstrates omission reporting and mapping discipline; it is not a Simulation API, source of truth, or stable exporter contract. |
-| **Integration / adapter tooling** | `@simulation-external/world-markdown`   | Markdown rendering and safe vault synchronization helpers. This is useful for Markdown-oriented integrations and is not a dependency of the World Exchange contract or core file tooling.          |
-| **Supporting data**               | `@simulation-external/world-fixtures`   | Validated demo and test data. Its sample identities/content carry no production-data or contract-stability guarantee, and it is not required to parse or consume a real portable exchange.         |
-| **Reference consumers**           | `apps/web`, `apps/obsidian-plugin`      | First-party applications that exercise the same exchange. Their UI state, navigation, vault integration, and other internals are not platform contracts.                                           |
+| Layer                             | Package or surface                      | Role and stability                                                                                                                                                                                  |
+| --------------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Contract**                      | `@simulation-external/world-schema`     | World Exchange v1/v2 types, stable ID/reference shape, collection coverage, validation semantics, and indexes. This owns the typed contract; its wire compatibility is governed by `schemaVersion`. |
+| **Core tooling**                  | `@simulation-external/world-io`         | UTF-8 JSON parsing, schema validation, and deterministic serialization. It depends at runtime only on `world-schema`; it does not map domain sources or define a second schema.                     |
+| **Integration / adapter tooling** | `@simulation-external/world-projection` | Experimental External-only candidate-facts adapter prototype. It demonstrates omission reporting and mapping discipline; it is not a Simulation API, source of truth, or stable exporter contract.  |
+| **Integration / adapter tooling** | `@simulation-external/world-markdown`   | Markdown rendering and safe vault synchronization helpers. This is useful for Markdown-oriented integrations and is not a dependency of the World Exchange contract or core file tooling.           |
+| **Supporting data**               | `@simulation-external/world-fixtures`   | Validated demo and test data. Its sample identities/content carry no production-data or contract-stability guarantee, and it is not required to parse or consume a real portable exchange.          |
+| **Reference consumers**           | `apps/web`, `apps/obsidian-plugin`      | First-party applications that exercise the same exchange. Their UI state, navigation, vault integration, and other internals are not platform contracts.                                            |
 
 Applications depend on the platform directionally. Reusable packages must not
 depend on either application. Test-only dependencies used to prove
@@ -59,7 +59,10 @@ points, not reach into `src`, `dist`, tests, or private implementation files.
 
 ### Contract: `world-schema`
 
-The intended contract exports are `WorldExchange`, `WorldEntity`,
+The intended contract exports are `WorldExchange`, `WorldExchangeV1`,
+`WorldExchangeV2`, `WorldExchangeCollectionCoverage`,
+`WorldExchangeCollectionCoverageStatus`, `WorldExchangeCollectionName`,
+`EffectiveCollectionCoverage`, `WorldEntity`,
 `WorldExchangeIndex`, the entity and JSON types, validation issue/result
 types, `validateWorldExchange`, and the generic index helpers
 `buildWorldExchangeIndex` and `getWorldEntityById`. Entity fields,
@@ -117,8 +120,9 @@ const people = world.people;
 ```
 
 `parseWorldExchange` decodes/accepts JSON, rejects malformed input, and
-validates against World Exchange v1. It does not repair data or synthesize
-IDs. The complete runnable proof, including a local `*.world.json` sample, is
+validates against World Exchange v1 or v2. V1 coverage is exposed as
+`LEGACY_UNKNOWN`; v2 uses its required producer-declared coverage map. Parsing
+does not repair data or synthesize IDs. The complete runnable proof, including a local `*.world.json` sample, is
 in [`examples/minimal-consumer`](../examples/minimal-consumer/README.md).
 That example has one runtime dependency, `world-io`, which in turn depends on
 `world-schema`; it imports no app, fixture, projection, or Markdown code.
@@ -189,14 +193,15 @@ fallbacks.
 
 ## Authority, readiness, and future exporter
 
-Stage D.3 does not change the current real-Simulation readiness:
+Stage D.4 adds collection coverage to the External contract without changing
+the current real-Simulation readiness:
 
-| World Exchange concept                                                   | Current readiness for real Simulation projection                      |
-| ------------------------------------------------------------------------ | --------------------------------------------------------------------- |
-| World                                                                    | `BLOCKED_BY_CURRENT_ARCHITECTURE` — no approved stable World identity |
-| Faction                                                                  | `READY_TO_PROJECT` conceptually                                       |
-| Person, City, Location, Institution, Item, HistoricalEvent, Relationship | `PARTIALLY_SUPPORTED`                                                 |
-| Organization                                                             | `DEFERRED`                                                            |
+| World Exchange concept                                                   | Current readiness for real Simulation projection                                                            |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| World                                                                    | `PARTIALLY_SUPPORTED` — WI-A supplies stable `WorldId`; no approved External read port or ID mapping exists |
+| Faction                                                                  | `READY_TO_PROJECT` conceptually                                                                             |
+| Person, City, Location, Institution, Item, HistoricalEvent, Relationship | `PARTIALLY_SUPPORTED`                                                                                       |
+| Organization                                                             | `DEFERRED`                                                                                                  |
 
 Those labels describe Simulation source readiness, not whether fixture/project
 World Exchange documents can use the schema. Consult the [projection study](SIMULATION_PROJECTION_STUDY.md),
@@ -215,7 +220,7 @@ approved read-only projection port
           ↓
 Simulation-side adapter/exporter (one producer)
           ↓
-World Exchange v1
+World Exchange v1 or v2
           ↓
 optional world-io / portable `*.world.json`
           ↓

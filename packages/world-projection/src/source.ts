@@ -1,3 +1,5 @@
+import type { WorldExchangeCollectionCoverage } from "@simulation-external/world-schema";
+
 /** A semantic identity supplied by a source authority, never a display label. */
 export type SourceIdentity = string;
 
@@ -61,6 +63,8 @@ export interface ItemDefinitionCandidate {
  */
 export interface ProjectionSource {
   readWorldIdentity(): WorldIdentityCandidate | undefined;
+  /** Whole-World capability declaration for every emitted collection. */
+  readCollectionCoverage(): WorldExchangeCollectionCoverage;
   readPeople(): readonly PersonCandidate[];
   readCities(): readonly CityCandidate[];
   readLocations(): readonly LocationCandidate[];

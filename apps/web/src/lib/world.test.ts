@@ -1,8 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { worldFixture } from "@simulation-external/world-fixtures";
+import {
+  collectionCoverageFixture,
+  legacyWorldFixture,
+  worldFixture,
+} from "@simulation-external/world-fixtures";
 import type { WorldExchange } from "@simulation-external/world-schema";
 import {
   collectionEntries,
+  collectionCountLabel,
+  collectionEmptyMessage,
   entityName,
   entityId,
   eventYear,
@@ -20,6 +26,24 @@ describe("World Explorer data helpers", () => {
     expect(
       collectionEntries(world, "cities").map(({ entity }) => entityId(entity)),
     ).toContain("city-aurora");
+  });
+
+  it("labels known-empty, unsupported, omitted, and legacy counts truthfully", () => {
+    expect(collectionCountLabel(collectionCoverageFixture, "cities")).toBe("0");
+    expect(collectionCountLabel(collectionCoverageFixture, "locations")).toBe(
+      "—",
+    );
+    expect(
+      collectionCountLabel(collectionCoverageFixture, "organizations"),
+    ).toBe("—");
+    expect(collectionCountLabel(collectionCoverageFixture, "people")).toBe("1");
+
+    const emptyLegacy = structuredClone(legacyWorldFixture);
+    emptyLegacy.people = [];
+    expect(collectionCountLabel(emptyLegacy, "people")).toBe("—");
+    expect(collectionEmptyMessage(emptyLegacy, "people")).toContain(
+      "does not confirm that the World has none",
+    );
   });
 
   it("uses consumer labels when optional source display names are absent", () => {

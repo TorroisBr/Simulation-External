@@ -68,6 +68,12 @@ describe("read-only World Exchange projection prototype", () => {
     expect(exchange.locations[0]?.name).toBeUndefined();
     expect(exchange.factions[0]?.name).toBeUndefined();
     expect(exchange.factions[0]?.memberIds).toHaveLength(2);
+    expect(exchange.schemaVersion).toBe(2);
+    if (exchange.schemaVersion !== 2)
+      throw new Error("Expected the projection to emit World Exchange v2");
+    expect(exchange.collectionCoverage.people).toBe("INCLUDED");
+    expect(exchange.collectionCoverage.institutions).toBe("KNOWN_EMPTY");
+    expect(exchange.collectionCoverage.organizations).toBe("UNSUPPORTED");
     expect(result.omissions).not.toEqual(
       expect.arrayContaining([expect.objectContaining({ field: "name" })]),
     );
@@ -95,7 +101,7 @@ describe("read-only World Exchange projection prototype", () => {
     );
   });
 
-  it("omits duplicate source identities instead of selecting an arbitrary row", () => {
+  it("fails closed when a duplicate makes an included collection incomplete", () => {
     const source = createConsumerCompatibilityMock();
     const person = source.readPeople()[0]!;
     const duplicate = {
@@ -108,14 +114,39 @@ describe("read-only World Exchange projection prototype", () => {
     };
     const result = projectWorldExchange(duplicate);
 
-    expect(result.exchange?.people.map(({ id }) => id)).toEqual([
-      toWorldExchangeId("Person", "fixture-person:tomas"),
-    ]);
+    expect(result.exchange).toBeNull();
     expect(result.omissions).toContainEqual(
       expect.objectContaining({
         concept: "Person",
         code: "duplicate-source-identity",
         sourceId: "fixture-person:lyra",
+      }),
+    );
+    expect(result.omissions).toContainEqual(
+      expect.objectContaining({
+        concept: "Person",
+        code: "incomplete-collection-projection",
+        field: "people",
+      }),
+    );
+  });
+
+  it("rejects source coverage that contradicts the returned collection rows", () => {
+    const source = createConsumerCompatibilityMock();
+    const contradictory = {
+      ...source,
+      readCollectionCoverage: () => ({
+        ...source.readCollectionCoverage(),
+        people: "KNOWN_EMPTY" as const,
+      }),
+    };
+    const result = projectWorldExchange(contradictory);
+
+    expect(result.exchange).toBeNull();
+    expect(result.omissions).toContainEqual(
+      expect.objectContaining({
+        code: "exchange-validation-failed",
+        field: "$.collectionCoverage.people",
       }),
     );
   });

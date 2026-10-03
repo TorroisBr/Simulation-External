@@ -1,8 +1,13 @@
 # World Exchange Contract
 
 `@simulation-external/world-schema` owns the typed, renderer-independent
-World Exchange v1 contract and its validation semantics. Its package-root
-exports include `WorldExchange`, `WorldEntity`, `WorldExchangeIndex`, the
+World Exchange v1 and v2 contracts and their validation semantics. V2 adds a
+required whole-World coverage declaration for each collection; v1 remains
+valid with coverage interpreted by updated consumers as `LEGACY_UNKNOWN`. Its
+package-root exports include `WorldExchange`, `WorldExchangeV1`,
+`WorldExchangeV2`, `WorldExchangeCollectionCoverage`,
+`WorldExchangeCollectionCoverageStatus`, `WorldExchangeCollectionName`,
+`EffectiveCollectionCoverage`, `WorldEntity`, `WorldExchangeIndex`, the
 entity/JSON types, validation issue/result types, `validateWorldExchange`, and
 generic world-index helpers.
 

@@ -2,7 +2,7 @@
 
 ## Purpose and decision
 
-This Stage D study defines a future read-only projection boundary from Simulation to World Exchange v1. It records canonical source evidence, entity mapping limits, identity rules, and the decisions required before an exporter can be built. It authorizes no runtime integration, transport, persistence reading, authoring, or import.
+This Stage D study records canonical source evidence, entity-field mapping limits, identity rules, and decisions required before an exporter can be built. Its original field analysis targets the World Exchange v1 entity shape. World Exchange v2 now adds whole-World collection coverage; that External-owned completeness contract is documented in [Collection Coverage](WORLD_EXCHANGE_COLLECTION_COVERAGE.md) and is an additional prerequisite, not a new Simulation source capability. This study authorizes no runtime integration, transport, persistence reading, authoring, or import.
 
 The previous study used Simulation main at 002a55859544d1e26247c274e6d52590fa671a90 as its source baseline. That ref did not contain the promoted phase architecture and States listed below. Its claims that durable Person, Institution, Faction, and stable Location authorities were absent are superseded. They described that inspected main tree, not current canonical architecture. The previous study also treated a legacy Organization runtime as current authority; canonical architecture explicitly defers generic Organization. The mapping document corrects those conclusions and retains questions that still apply.
 
@@ -12,58 +12,63 @@ World Exchange remains the external read model. P12 remains a separate persisten
 
 ## Canonical Simulation evidence inspected
 
-The sibling repository is Simulation at E:/GitHub/GeneralSimulation/MainSimulation. Inspection was read-only. The source baseline uses the architecture ref and promoted phase State documents below, not Simulation main.
+Simulation source inspection was read-only and used only the ignored `.references/Simulation` mirror. It did not inspect the sibling checkout. The current canonical Phase 12 State is `6b30d86c3214a98603bea809154e2dc06047d6a3`; the approved architecture baseline and promoted implementation refs below are recorded separately.
 
-| Evidence              | Canonical ref                            | Relevance                                                                                                                                |
-| --------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Architecture baseline | c285466c355103d3637ac165246591b72eb7bda0 | Domain ownership, truth/Knowledge, identity, Organization/Faction/Institution distinctions, geography, and event/history policy          |
-| Phase 5               | 3c3a5a7fa5bac8f301b98ec92307eadb19af25ff | PersonId and PersonStore; aggregate population; residence; genealogy; world-owned Institutions and Offices; mortality and continuity     |
-| Phase 6               | 77b139437407a92e52e08b40f885c8d1b606dee2 | Faction identity/affiliation; holder-scoped political Knowledge; generic Organization and C3 relationship projection explicitly deferred |
-| Phase 7               | 1f4651e99db2c357dd3be3c6b9284d104379f706 | Stable HexId/LocationId authority; battle outcome and downstream event distinction                                                       |
-| Phase 8               | 470667d37863384edadb3d93ef64d8004aff46a3 | Factual geography, City/Site anchors, Person position and actor Knowledge boundaries                                                     |
-| Phase 9               | 82396ae7ffaf407fda278928da456b06dc5394d4 | Authored bootstrap and one bounded authored Hex/Location source; no general World identity contract                                      |
-| Phase 10              | 252ad6b9a507f1c001c05a1e19c2546ebd0707a2 | Ruin/LocalTopology is a bounded Location consumer, not a replacement Location authority                                                  |
-| Phase 11              | 308e24d0744112e8f2b741521b8b3e4acb51ebbf | Actor choice uses PersonId; choice/intent is separate from outcome                                                                       |
-| Phase 12              | f538a096bf4b2558566518483bc60f0129718a3b | Boundary check only: P12-A waits on dependencies, P12-B is incomplete; no save model used as projection source                           |
-| Phase 14              | 4caecbbfb0464c965811402b3c11d8717605114a | Bounded material flow; settlement ownership, market custody, item definition and authored P14 identities                                 |
-| Phase 18              | 8ac2d7885ea1f00d544d88a64bf918a411934f7f | Logical time, causal order, and activity identity boundaries                                                                             |
-| Phase 20              | 7a81cc0ecbc511dd36c248ec62c7b20f7e477f53 | ActivityInstanceId, definition, and participant identities are distinct; activity is not automatically a HistoricalEvent                 |
+| Evidence                              | Canonical ref                            | Relevance                                                                                                                                       |
+| ------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Architecture baseline                 | 451340c56e9b676bf6ea43412bcb856b9ccde3de | Current approved §§91A–91B: durable WorldId semantics and factual-projection direction; design authority, not by itself implementation evidence |
+| Current Phase 12 State                | 6b30d86c3214a98603bea809154e2dc06047d6a3 | Current canonical delivery record for promoted WI-A identity, FR-B factual reads, FR-C Faction facts, and their explicit limitations            |
+| WI-A WorldId implementation           | 3b39e0d89858dce517ad72cbb76da621eb954bad | Typed `WorldId` source and bootstrap integration; stable ID exists in Simulation, but no World Exchange exporter/read port is established       |
+| WI-A current-base revalidation        | 242ae6bf81c2f4da832be1e7948bbaac004a620b | Promoted current-base bootstrap/admission revalidation; does not add a World Exchange producer or factual read cut                              |
+| FR-B core factual-read implementation | 0ad19ecd9633e01d358a9ff826ca3ca5f8e3627c | Bounded, capability-scoped factual reads; no general whole-World collection guarantee                                                           |
+| FR-B live read implementation         | aeb76c687d00a49f505ab264a58a508a20e4923b | Promoted live factual-read boundary; its selected cut does not establish collection coverage for an External artifact                           |
+| FR-C Faction facts                    | ec042b30b1c0a390f611c47cb22b75631cfb9556 | Promoted copied Faction facts and active affiliations; does not supply Person collection enumeration or World Exchange output                   |
+| Phase 5                               | 3c3a5a7fa5bac8f301b98ec92307eadb19af25ff | PersonId and PersonStore; aggregate population; residence; genealogy; world-owned Institutions and Offices; mortality and continuity            |
+| Phase 6                               | 77b139437407a92e52e08b40f885c8d1b606dee2 | Faction identity/affiliation; holder-scoped political Knowledge; generic Organization and C3 relationship projection explicitly deferred        |
+| Phase 7                               | 1f4651e99db2c357dd3be3c6b9284d104379f706 | Stable HexId/LocationId authority; battle outcome and downstream event distinction                                                              |
+| Phase 8                               | 470667d37863384edadb3d93ef64d8004aff46a3 | Factual geography, City/Site anchors, Person position and actor Knowledge boundaries                                                            |
+| Phase 9                               | 82396ae7ffaf407fda278928da456b06dc5394d4 | Historical phase scope: authored bootstrap and a bounded Hex/Location source; its lack of WorldId predates the later §91A/WI-A decision         |
+| Phase 10                              | 252ad6b9a507f1c001c05a1e19c2546ebd0707a2 | Ruin/LocalTopology is a bounded Location consumer, not a replacement Location authority                                                         |
+| Phase 11                              | 308e24d0744112e8f2b741521b8b3e4acb51ebbf | Actor choice uses PersonId; choice/intent is separate from outcome                                                                              |
+| Phase 14                              | 4caecbbfb0464c965811402b3c11d8717605114a | Bounded material flow; settlement ownership, market custody, item definition and authored P14 identities                                        |
+| Phase 18                              | 8ac2d7885ea1f00d544d88a64bf918a411934f7f | Logical time, causal order, and activity identity boundaries                                                                                    |
+| Phase 20                              | 7a81cc0ecbc511dd36c248ec62c7b20f7e477f53 | ActivityInstanceId, definition, and participant identities are distinct; activity is not automatically a HistoricalEvent                        |
 
-Reviewed source/document paths include Simulation docs/SIMULATION_ARCHITECTURE.md; relevant PHASE5 through PHASE20 State/design records; Person/PersonId.cs and Person/PersonRuntime.cs; Institution/InstitutionContracts.cs; FactionContracts.cs; CityData.cs and CityRuntime.cs; Data/ItemData.cs; SpatialAuthority.cs; and the P14-A, P11, P18, and P20 checkpoint records. P12 was read solely to confirm separation and current readiness. P12 snapshot, persistence, receipt, hydration, save, and continuation structures are not World Exchange sources.
+Reviewed source/document paths include the exact-ref Simulation `AGENTS.md`, `docs/SIMULATION_ARCHITECTURE.md`, current `docs/PHASE12_STATE.md`, relevant Phase 5–20 State/design records, `WorldIdentity.cs`, `SimulationBootstrapComposition.cs`, `SimulationRuntime.cs`, `PersonId.cs` and `PersonRuntime.cs`, `InstitutionContracts.cs`, `FactionContracts.cs`, `CityData.cs` and `CityRuntime.cs`, `ItemData.cs`, `SpatialAuthority.cs`, `FactualRead/FactionFactualReader.cs`, and the P14-A, P11, P18, and P20 checkpoint records. Phase 12 State was read as delivery evidence, not as a data source. No P12 snapshot, persistence, receipt, hydration, save, or continuation structure is used as a projection source.
 
 ## Classification meanings and result
 
 These labels apply to each World Exchange entity mapping, not to complete-payload or exporter readiness.
 
-- READY_TO_PROJECT: Canonical Simulation authority has stable identity and required v1 factual fields for a bounded mapping. A shared port, ID encoding, and mapper remain future work.
+- READY_TO_PROJECT: Canonical Simulation authority has stable identity and required entity facts for a bounded mapping. A shared port, ID encoding, collection-coverage proof, and mapper remain future work.
 - PARTIALLY_SUPPORTED: Facts exist, but at least one required field, identity, lifecycle, or relationship meaning is missing or ambiguous.
 - BLOCKED_BY_CURRENT_ARCHITECTURE: A required concept/authority is absent or conflicts with an explicit current ownership boundary.
 - DEFERRED: Simulation architecture explicitly leaves the concept outside promoted scope.
 
-| Concept         | Classification                  |
-| --------------- | ------------------------------- |
-| World           | BLOCKED_BY_CURRENT_ARCHITECTURE |
-| Person          | PARTIALLY_SUPPORTED             |
-| City            | PARTIALLY_SUPPORTED             |
-| Location        | PARTIALLY_SUPPORTED             |
-| Organization    | DEFERRED                        |
-| Institution     | PARTIALLY_SUPPORTED             |
-| Faction         | READY_TO_PROJECT                |
-| Item            | PARTIALLY_SUPPORTED             |
-| HistoricalEvent | PARTIALLY_SUPPORTED             |
-| Relationship    | PARTIALLY_SUPPORTED             |
+| Concept         | Classification      |
+| --------------- | ------------------- |
+| World           | PARTIALLY_SUPPORTED |
+| Person          | PARTIALLY_SUPPORTED |
+| City            | PARTIALLY_SUPPORTED |
+| Location        | PARTIALLY_SUPPORTED |
+| Organization    | DEFERRED            |
+| Institution     | PARTIALLY_SUPPORTED |
+| Faction         | READY_TO_PROJECT    |
+| Item            | PARTIALLY_SUPPORTED |
+| HistoricalEvent | PARTIALLY_SUPPORTED |
+| Relationship    | PARTIALLY_SUPPORTED |
 
-Faction has a bounded mapping: canonical Faction records have a stable FactionId, and current members are explicit PersonId-based affiliations. Stage D.1 made display names optional because they are not identity or domain validity; a missing label no longer blocks a Faction row. The classification describes entity mapping only. World identity, the common read port, and reciprocal membership-field policy remain cross-cutting prerequisites. Per-entity evidence and all requested mapping dimensions are in [Simulation Entity Mapping](SIMULATION_ENTITY_MAPPING.md) and the [contract pressure review](WORLD_EXCHANGE_CONTRACT_PRESSURE_REVIEW.md).
+The World classification changed after the earlier mapping: promoted WI-A now provides a typed, stable `WorldId`. This makes the required World identity fact available, but does not provide a Simulation-owned World Exchange read port, approve External ID encoding, define a display name, or prove whole-World collection coverage. Faction likewise has a bounded mapping: canonical Faction records have a stable FactionId, and current members are explicit PersonId-based affiliations. Stage D.1 made display names optional because they are not identity or domain validity; a missing label no longer blocks a Faction row. These classifications describe entity mapping only. A common read port, one compatible source cut, v2 collection-completeness proof, and reciprocal membership-field policy remain cross-cutting prerequisites. Per-entity evidence and all requested mapping dimensions are in [Simulation Entity Mapping](SIMULATION_ENTITY_MAPPING.md) and the [contract pressure review](WORLD_EXCHANGE_CONTRACT_PRESSURE_REVIEW.md).
 
 ## Proposed projection boundary
 
-Simulation should own or approve the read port because Simulation owns the semantics separating fact, actor Knowledge, and derived views. The port should read reviewed domain authorities at one documented coherent boundary and return purpose-built immutable projection data. It should not return public runtime classes, internal Stores, Unity objects, diagnostics snapshots, or persistence records.
+Simulation should own or approve the read port because Simulation owns the semantics separating fact, actor Knowledge, and derived views. WI-A supplies a stable `WorldId`, and FR-B/FR-C supply bounded factual-read capabilities; neither is a complete World Exchange port. The future port should read reviewed domain authorities at one documented coherent boundary and return purpose-built immutable projection data. It should not return public runtime classes, internal Stores, Unity objects, diagnostics snapshots, or persistence records.
 
-External should own a separate mapper from that approved input to World Exchange v1 and validate the result with @simulation-external/world-schema. The mapper must not reference the Simulation assembly or make domain decisions. It may omit unsupported optional values and must fail closed on missing required facts, ambiguous IDs, duplicates, and dangling references.
+External should own a separate mapper from that approved input to World Exchange v2 and validate the result with `@simulation-external/world-schema`. The mapper must not reference the Simulation assembly or make domain decisions. It may omit unsupported optional values and must fail closed on missing required facts, ambiguous IDs, incomplete included collections, duplicates, and dangling references. V2 coverage is an additional claim that requires complete whole-World source authority, not merely a successful bounded read.
 
 Assembly/repository ownership, contract sharing, and invocation point remain open. Invocation and transport are separate decisions. No IPC, REST, socket, or in-Simulation server is proposed. A read must not start or advance Simulation, mutate domain state, hydrate state, or load a save.
 
-A future input needs an explicitly selected World identity and coherent as-of boundary. World Exchange v1 has no snapshot timestamp. Do not hide snapshot time, source Stores, runtime classes, or continuation state in metadata. A future envelope or schema change needs separate review.
+A future input needs an explicitly selected World identity and coherent as-of boundary. World Exchange v1 and v2 have no snapshot timestamp. V2 requires included collections and their references to share one compatible source-consistent read boundary, but it does not publish freshness metadata. Do not hide snapshot time, source Stores, runtime classes, or continuation state in metadata.
 
 ### ID mapping strategy
 
@@ -73,7 +78,7 @@ Use canonical semantic IDs where available: PersonId, InstitutionId, FactionId, 
 
 CityData.DefinitionId identifies authored City data, not a generally approved City instance. P14-A settlementSemanticId is for its bounded material-flow owner; it is not evidence of a universal CityId. Person residence currently refers through a runtime settlement identifier and needs an approved City crosswalk. Domain event and generic relationship IDs need their own lifecycle rules. If a source lacks stable semantic identity, omit or block it; do not hash names or invent source IDs.
 
-Simulation must provide a stable World ID. A configuration label, authored profile name, seed, Unity asset identity, scenario, or runtime instance is not interchangeable with that identity.
+Simulation now provides a stable typed `WorldId`, with canonical `Value` form `world:<32 lowercase hexadecimal digits>`, allocated for a new causal World continuation by the promoted WI-A bootstrap path. A configuration label, authored profile name, seed, Unity asset identity, scenario, or runtime instance is not interchangeable with that identity. External still needs an owner-reviewed mapping from that source identity to `world.id` and an approved read path; it must not read the identity from P12 persistence.
 
 ## Factual-world-truth policy
 
@@ -95,7 +100,7 @@ World Exchange metadata is not an escape hatch for Simulation internals.
 
 ## Knowledge projection policy
 
-World Exchange v1 has no actor-scoped Knowledge, observer, belief, provenance, or freshness contract. Omit Knowledge from the factual payload.
+Neither World Exchange v1 nor v2 has an actor-scoped Knowledge, observer, belief, provenance, or freshness contract. Omit Knowledge from the factual payload.
 
 This excludes spatially known Locations/routes, commercial observations, and political observations held by Person, Institution, or Faction. Political Knowledge is independently holder-scoped and does not flow to Faction members. A merchant observation is not current global stock or price.
 
@@ -129,13 +134,13 @@ This study defines read-only projection only. Future authoring/import is a separ
 ## Exact prerequisites for a real exporter
 
 1. Simulation architecture owners accept or revise the mapping and name the owning source and meaning for every field.
-2. Simulation defines World identity/lifecycle, including whether World means authored setting, configuration, initialized run, or another concept.
+2. Use the promoted WI-A WorldId and §91A continuation semantics. Simulation owners must approve how the read port exposes it, and resolve compatibility for older or migrated Worlds that may not have a WI-A identity. Do not replace WorldId with a profile, config name, or seed.
 3. Simulation approves stable instance identity and duplicate/rename/reuse/deletion rules for each projected Person and City not covered by a suitable semantic ID. It defines residence, Location, Hex, and transit mapping.
 4. Resolve missing required v1 facts: Location kind; Organization authority/type/membership; Institution type/membership/location; Item type and definition/instance/stack semantics. Display names are optional and must remain source-owned if supplied. Schema additions such as quantity, coordinates, office, birth representation, or snapshot-time fields require separate semantic review.
 5. Approve public Faction, Organization, Institution, and Relationship semantics, including direct fields versus general edges and current versus historical membership.
 6. Define retained HistoricalEvent sources, event IDs, retention/visibility, participants/locations, custom-calendar conversion, and as-of ordering/precision.
 7. Approve the read port's owner, repository/assembly, immutable result shape, coherent read point, failure/omission behavior, and contract versioning. It must not use or expose P12 snapshot structures.
-8. Agree producer conformance checks for repeated-export ID stability, missing/duplicate identity, dangling refs, Knowledge exclusion, history inclusion, consistent as-of facts, and read-only/no-advance behavior.
+8. Agree producer conformance checks for repeated-export ID stability, WorldId-to-`world.id` mapping, whole-World collection enumeration, same-World source-cut consistency, missing/duplicate identity, dangling refs, Knowledge exclusion, complete-history authority, and read-only/no-advance behavior. `INCLUDED` and `KNOWN_EMPTY` must not be asserted from partial or selected views; read failure blocks export.
 9. Select invocation only after the contract is agreed. Transport is a separate decision. This study authorizes no IPC, REST, sockets, server, persistence access, or live mutation.
 
 ## Open architecture questions

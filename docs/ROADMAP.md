@@ -2,7 +2,7 @@
 
 ## Stage A — external schema and fixtures
 
-Define World Exchange v1, validation, stable IDs/references, and a connected fictional fixture world. Keep it independent from persistence and Simulation runtime code.
+Define the v1 entity shape, validation, stable IDs/references, and a connected fictional fixture world. Keep it independent from persistence and Simulation runtime code.
 
 ## Stage B — Web World Explorer
 
@@ -19,7 +19,7 @@ The corrected study and an External-only fixture-backed adapter prototype define
 ### Stage D.2 — portable World Exchange (implemented, fixture/project data only)
 
 `world-io` now parses, validates, and deterministically serializes normal
-World Exchange v1 JSON artifacts. The Web Explorer can open a local file, and
+World Exchange v1 and v2 JSON artifacts. The Web Explorer can open a local file, and
 Obsidian can manually import the same file through the existing safe Markdown
 sync path. The bundled fixture remains available. This makes the External
 artifact boundary usable by multiple consumers; it does not add a Simulation
@@ -36,6 +36,18 @@ documented. A minimal consumer package compiles and parses a portable sample
 using only `world-io` at runtime. This stage adds no Simulation exporter,
 service, transport, or package publication. See
 [External Platform Surface](EXTERNAL_PLATFORM_SURFACE.md).
+
+### Stage D.4 — World Exchange collection coverage (implemented)
+
+World Exchange v2 declares whole-World coverage for all nine collections with
+`INCLUDED`, `KNOWN_EMPTY`, `UNSUPPORTED`, or `NOT_INCLUDED`. Updated readers
+continue to accept v1 while treating its collection coverage as unknown; they
+do not infer zero or completeness from array lengths. The fixture, portable
+I/O, External-only projection prototype, Web states, and Obsidian import tests
+exercise the contract. V2 requires source authority and a compatible whole-
+World read cut before a real exporter may claim `INCLUDED` or `KNOWN_EMPTY`.
+This stage changes no Simulation code and does not authorize a Simulation
+exporter. See [Collection Coverage](WORLD_EXCHANGE_COLLECTION_COVERAGE.md).
 
 ## Stage E — controlled authoring/import (future)
 

@@ -2,21 +2,25 @@
 
 ## Decision summary
 
-This Stage D.1 review evaluates the current World Exchange v1 fields against
-the corrected, promoted Simulation evidence in the [projection study](SIMULATION_PROJECTION_STUDY.md)
-and [entity mapping](SIMULATION_ENTITY_MAPPING.md). It changes only
-Simulation-External. It does not authorize or implement a Simulation exporter,
-transport, persistence reader, authoring/import path, or runtime mutation.
+This Stage D.1 review evaluates the World Exchange v1 entity fields against
+the Simulation evidence available at that review's source baseline. Its World
+identity finding predates the later §91A/WI-A decision and is superseded by the
+current evidence in the [projection study](SIMULATION_PROJECTION_STUDY.md) and
+[entity mapping](SIMULATION_ENTITY_MAPPING.md). The historical field decisions
+remain useful for the v1 schema pressure analysis; current readiness must follow
+the corrected Stage D study. It changes only Simulation-External. It does not
+authorize or implement a Simulation exporter, transport, persistence reader,
+authoring/import path, or runtime mutation.
 
 **World decision: B.** Keep the `world` envelope object and its stable `id`
 required. Make `world.name` optional. The required World object is the
-World Exchange payload's scope anchor; this does not assert that Simulation
-currently has a World aggregate or identity. Without the ID, entity IDs and
+World Exchange payload's scope anchor. Without the ID, entity IDs and
 references have no durable world scope, and Obsidian cannot associate notes
 with a world. A display label does not supply that identity. The current Web
-and Markdown consumers already render a fallback when a label is absent.
-Simulation still has no source-owned World ID, so a Simulation-backed exchange
-remains blocked.
+and Markdown consumers already render a fallback when a label is absent. This
+review's source snapshot had no source-owned World ID; promoted WI-A now
+provides stable `WorldId`. The remaining blockers are approved read-port
+exposure, External mapping, and compatibility for older or migrated Worlds.
 
 **Display labels:** Make the World and entity `name` properties optional, while
 requiring a non-empty value whenever one is supplied. Stable IDs remain
@@ -54,7 +58,7 @@ each of the nine entity collections.
 | Entity        | Field              | Current requirement       | Classification    | Simulation evidence                                                                                                                       | Recommendation       | Compatibility impact                                                                                                    |
 | ------------- | ------------------ | ------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | WorldExchange | `schemaVersion`    | Required; literal `1`     | UNRESOLVED        | This identifies the External contract, not a Simulation fact.                                                                             | KEEP_REQUIRED        | No change; consumers continue to reject unsupported versions.                                                           |
-| WorldExchange | `world`            | Required object           | IDENTITY_REQUIRED | The Exchange needs one explicit world scope; Simulation has not defined its corresponding World authority.                                | KEEP_REQUIRED        | No alternate envelope is introduced.                                                                                    |
+| WorldExchange | `world`            | Required object           | IDENTITY_REQUIRED | The Exchange needs one explicit world scope; WI-A now defines stable `WorldId`, but an External read port and mapping are not approved.   | KEEP_REQUIRED        | No alternate envelope is introduced.                                                                                    |
 | WorldExchange | `people`           | Required array            | UNRESOLVED        | The Simulation projection cohort/completeness rule is open.                                                                               | KEEP_REQUIRED        | Preserve v1 shape; an empty array must not be interpreted as proof that an unsupported source has no people.            |
 | WorldExchange | `cities`           | Required array            | UNRESOLVED        | City instance identity and exchange completeness are open.                                                                                | KEEP_REQUIRED        | Same v1 shape; completeness semantics remain an exporter prerequisite.                                                  |
 | WorldExchange | `locations`        | Required array            | UNRESOLVED        | Hex, Location, Crossing, Site, and topology scope are not interchangeable.                                                                | KEEP_REQUIRED        | Same v1 shape; do not equate an unsupported source with an empty factual collection.                                    |
@@ -70,12 +74,12 @@ each of the nine entity collections.
 
 ### World
 
-| Entity | Field         | Current requirement | Classification    | Simulation evidence                                                                                                | Recommendation | Compatibility impact                                                            |
-| ------ | ------------- | ------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------ | -------------- | ------------------------------------------------------------------------------- |
-| World  | `id`          | Required            | IDENTITY_REQUIRED | No canonical World record/ID was found; profile, seed, config, asset, and runtime identities are not equivalent.   | KEEP_REQUIRED  | Remains the payload scope key and a cross-cutting Simulation blocker.           |
-| World  | `name`        | Required → optional | PRESENTATION_ONLY | `simulationName` and authored profile labels describe configuration/authoring unless Simulation defines otherwise. | MAKE_OPTIONAL  | Backward-compatible v1 loosening; Web/Markdown fallback is already implemented. |
-| World  | `description` | Optional            | PRESENTATION_ONLY | No canonical World description owner; profile/UI prose is not automatically World truth.                           | DEFER_DECISION | No change; omit unless an approved source owns the text.                        |
-| World  | `era`         | Optional            | OPTIONAL_FACT     | No general Simulation World-era mapping or calendar convention is established.                                     | DEFER_DECISION | No change; do not infer from profile or current year.                           |
+| Entity | Field         | Current requirement | Classification    | Simulation evidence                                                                                                | Recommendation | Compatibility impact                                                                                            |
+| ------ | ------------- | ------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------ | -------------- | --------------------------------------------------------------------------------------------------------------- |
+| World  | `id`          | Required            | IDENTITY_REQUIRED | At this review's source snapshot no canonical WorldId was present; promoted WI-A later established `WorldId`.      | KEEP_REQUIRED  | Remains the payload scope key; read-port exposure, External mapping, and older-World compatibility remain open. |
+| World  | `name`        | Required → optional | PRESENTATION_ONLY | `simulationName` and authored profile labels describe configuration/authoring unless Simulation defines otherwise. | MAKE_OPTIONAL  | Backward-compatible v1 loosening; Web/Markdown fallback is already implemented.                                 |
+| World  | `description` | Optional            | PRESENTATION_ONLY | No canonical World description owner; profile/UI prose is not automatically World truth.                           | DEFER_DECISION | No change; omit unless an approved source owns the text.                                                        |
+| World  | `era`         | Optional            | OPTIONAL_FACT     | No general Simulation World-era mapping or calendar convention is established.                                     | DEFER_DECISION | No change; do not infer from profile or current year.                                                           |
 
 ### Person
 
@@ -315,8 +319,8 @@ A real adapter, after separate Simulation approval, must:
 
 ## Open architecture questions
 
-- Which Simulation-owned authority defines the stable World ID, and what is its
-  lifecycle across profiles and repeated runs?
+- How will an approved read port expose WI-A `WorldId`, how will it map to
+  `world.id`, and what compatibility applies to older or migrated Worlds?
 - What is the intended Person projection cohort, including unnamed and dormant
   Persons, and who owns the read-consistent scope cut?
 - How does P14-A's bounded settlement identity relate, if at all, to a general

@@ -6,6 +6,7 @@ import {
   type Location,
   type Person,
   type WorldExchange,
+  type WorldExchangeCollectionName,
 } from "@simulation-external/world-schema";
 import type {
   ActiveFactionAffiliationFact,
@@ -45,6 +46,7 @@ export type ProjectionOmissionCode =
   | "item-instance-semantics-unresolved"
   | "historical-event-contract-unavailable"
   | "generic-relationship-contract-unavailable"
+  | "incomplete-collection-projection"
   | "exchange-validation-failed";
 
 export interface ProjectionOmission {
@@ -56,7 +58,7 @@ export interface ProjectionOmission {
 }
 
 export interface ProjectionResult {
-  /** Null means no complete v1 payload can be formed, usually because World is unknown. */
+  /** Null means no complete v2 payload can be formed. */
   exchange: WorldExchange | null;
   omissions: readonly ProjectionOmission[];
 }
@@ -75,7 +77,7 @@ export function toWorldExchangeId(
 }
 
 /**
- * Project only explicit factual candidates into World Exchange v1.
+ * Project only explicit factual candidates into World Exchange v2.
  * Missing required facts produce omissions; no display fallbacks are synthesized.
  */
 export function projectWorldExchange(
@@ -84,9 +86,11 @@ export function projectWorldExchange(
   const omissions: ProjectionOmission[] = [];
   const worldCandidate = source.readWorldIdentity();
   const world = projectWorld(worldCandidate, omissions);
+  const collectionCoverage = source.readCollectionCoverage();
 
+  const rawLocationCandidates = source.readLocations();
   const locationCandidates = uniqueCandidates(
-    source.readLocations(),
+    rawLocationCandidates,
     "Location",
     omissions,
   );
@@ -96,11 +100,8 @@ export function projectWorldExchange(
     if (entity) locations.set(candidate.sourceId!, entity);
   }
 
-  const cityCandidates = uniqueCandidates(
-    source.readCities(),
-    "City",
-    omissions,
-  );
+  const rawCityCandidates = source.readCities();
+  const cityCandidates = uniqueCandidates(rawCityCandidates, "City", omissions);
   const cities = new Map<string, City>();
   for (const candidate of cityCandidates) {
     const city = projectCity(candidate, locations, omissions);
@@ -141,8 +142,9 @@ export function projectWorldExchange(
     }
   }
 
+  const rawPersonCandidates = source.readPeople();
   const personCandidates = uniqueCandidates(
-    source.readPeople(),
+    rawPersonCandidates,
     "Person",
     omissions,
   );
@@ -152,8 +154,9 @@ export function projectWorldExchange(
     if (person) people.set(candidate.sourceId!, person);
   }
 
+  const rawFactionCandidates = source.readFactions();
   const factionCandidates = uniqueCandidates(
-    source.readFactions(),
+    rawFactionCandidates,
     "Faction",
     omissions,
   );
@@ -164,8 +167,9 @@ export function projectWorldExchange(
   }
 
   const institutions = new Map<string, Institution>();
+  const rawInstitutionCandidates = source.readInstitutions();
   for (const candidate of uniqueCandidates(
-    source.readInstitutions(),
+    rawInstitutionCandidates,
     "Institution",
     omissions,
   )) {
@@ -212,8 +216,54 @@ export function projectWorldExchange(
     return { exchange: null, omissions: sortOmissions(omissions) };
   }
 
+  const projectedCollections: Record<
+    WorldExchangeCollectionName,
+    readonly { id: string }[]
+  > = {
+    people: [...people.values()],
+    cities: [...cities.values()],
+    locations: [...locations.values()],
+    organizations: [],
+    institutions: [...institutions.values()],
+    factions: [...factions.values()],
+    items: [],
+    historicalEvents: [],
+    relationships: [],
+  };
+  const sourceCandidateCounts: Partial<
+    Record<WorldExchangeCollectionName, number>
+  > = {
+    people: rawPersonCandidates.length,
+    cities: rawCityCandidates.length,
+    locations: rawLocationCandidates.length,
+    institutions: rawInstitutionCandidates.length,
+    factions: rawFactionCandidates.length,
+  };
+  for (const [collection, candidateCount] of Object.entries(
+    sourceCandidateCounts,
+  ) as [WorldExchangeCollectionName, number][]) {
+    if (
+      collectionCoverage[collection] === "INCLUDED" &&
+      projectedCollections[collection].length !== candidateCount
+    ) {
+      omissions.push({
+        concept: conceptForCollection(collection),
+        code: "incomplete-collection-projection",
+        field: collection,
+        message:
+          "The source declared whole-World coverage, but one or more source candidates could not be mapped; no partial v2 artifact is emitted.",
+      });
+    }
+  }
+  if (
+    omissions.some(({ code }) => code === "incomplete-collection-projection")
+  ) {
+    return { exchange: null, omissions: sortOmissions(omissions) };
+  }
+
   const exchange: WorldExchange = {
-    schemaVersion: 1,
+    schemaVersion: 2,
+    collectionCoverage,
     world,
     people: [...people.values()].sort(byId),
     cities: [...cities.values()].sort(byId),
@@ -251,7 +301,7 @@ function projectWorld(
       code: "world-identity-unavailable",
       field: "id",
       message:
-        "No source-owned stable World identity is available; a complete World Exchange v1 payload cannot be emitted.",
+        "This projection source supplied no source-owned stable World identity; a complete World Exchange v2 payload cannot be emitted.",
     });
     return null;
   }
@@ -363,7 +413,7 @@ function projectLocation(
       code: "required-field-unavailable",
       ...withSourceId(candidate.sourceId),
       field: "kind",
-      message: "World Exchange v1 requires an approved public Location kind.",
+      message: "World Exchange requires an approved public Location kind.",
     });
   }
   if (!isPresent(candidate.publicKind)) return null;
@@ -539,6 +589,31 @@ function sortOmissions(values: ProjectionOmission[]): ProjectionOmission[] {
 
 function byId(left: { id: string }, right: { id: string }): number {
   return compareStrings(left.id, right.id);
+}
+
+function conceptForCollection(
+  collection: WorldExchangeCollectionName,
+): ProjectionConcept {
+  switch (collection) {
+    case "people":
+      return "Person";
+    case "cities":
+      return "City";
+    case "locations":
+      return "Location";
+    case "organizations":
+      return "Organization";
+    case "institutions":
+      return "Institution";
+    case "factions":
+      return "Faction";
+    case "items":
+      return "Item";
+    case "historicalEvents":
+      return "HistoricalEvent";
+    case "relationships":
+      return "Relationship";
+  }
 }
 
 function compareStrings(left: string, right: string): number {

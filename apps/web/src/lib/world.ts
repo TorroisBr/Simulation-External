@@ -1,6 +1,8 @@
-import type {
-  WorldEntity,
-  WorldExchange,
+import {
+  getWorldExchangeCollectionCoverage,
+  type EffectiveCollectionCoverage,
+  type WorldEntity,
+  type WorldExchange,
 } from "@simulation-external/world-schema";
 
 export const COLLECTIONS = [
@@ -120,6 +122,59 @@ export function collectionEntries(
   const value = readField(world, collection);
   if (!Array.isArray(value)) return [];
   return (value as WorldEntity[]).map((entity) => ({ collection, entity }));
+}
+
+export function collectionCoverage(
+  world: WorldExchange,
+  collection: CollectionKey,
+): EffectiveCollectionCoverage {
+  return getWorldExchangeCollectionCoverage(world, collection);
+}
+
+/** Counts supplied rows without presenting an undeclared zero as factual. */
+export function collectionCountLabel(
+  world: WorldExchange,
+  collection: CollectionKey,
+): string {
+  const count = collectionEntries(world, collection).length;
+  const coverage = collectionCoverage(world, collection);
+  if (count > 0) return coverage === "INCLUDED" ? String(count) : `${count}+`;
+  return coverage === "KNOWN_EMPTY" ? "0" : "—";
+}
+
+export function collectionCoverageDescription(
+  coverage: EffectiveCollectionCoverage,
+): string {
+  switch (coverage) {
+    case "INCLUDED":
+      return "The complete collection is included in this artifact.";
+    case "KNOWN_EMPTY":
+      return "The producer confirms that this collection is empty in this World.";
+    case "UNSUPPORTED":
+      return "This producer cannot provide the collection; the World may still contain entries.";
+    case "NOT_INCLUDED":
+      return "This artifact deliberately omits the collection; the World may still contain entries.";
+    case "LEGACY_UNKNOWN":
+      return "This v1 artifact does not declare collection coverage.";
+  }
+}
+
+export function collectionEmptyMessage(
+  world: WorldExchange,
+  collection: CollectionKey,
+): string {
+  switch (collectionCoverage(world, collection)) {
+    case "INCLUDED":
+      return "The artifact marks this collection as included but supplies no rows.";
+    case "KNOWN_EMPTY":
+      return "The producer confirms that this collection is empty in this World.";
+    case "UNSUPPORTED":
+      return "This producer cannot provide the collection; its absence does not mean the World has none.";
+    case "NOT_INCLUDED":
+      return "This artifact deliberately omits the collection; its absence does not mean the World has none.";
+    case "LEGACY_UNKNOWN":
+      return "This v1 artifact does not declare collection coverage, so an empty list does not confirm that the World has none.";
+  }
 }
 
 export function allEntities(world: WorldExchange): EntityEntry[] {

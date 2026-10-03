@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
   buildWorldExchangeIndex,
+  getWorldExchangeCollectionCoverage,
   getWorldEntityById,
   validateWorldExchange,
-  type WorldExchange,
+  type WorldExchangeCollectionCoverage,
+  type WorldExchangeV1,
+  type WorldExchangeV2,
 } from "./index.js";
 
-const emptyExchange = (): WorldExchange => ({
+const emptyExchange = (): WorldExchangeV1 => ({
   schemaVersion: 1,
   world: { id: "world-test", name: "Test World" },
   people: [],
@@ -19,6 +22,25 @@ const emptyExchange = (): WorldExchange => ({
   historicalEvents: [],
   relationships: [],
 });
+
+const allKnownEmptyCoverage: WorldExchangeCollectionCoverage = {
+  people: "KNOWN_EMPTY",
+  cities: "KNOWN_EMPTY",
+  locations: "KNOWN_EMPTY",
+  organizations: "KNOWN_EMPTY",
+  institutions: "KNOWN_EMPTY",
+  factions: "KNOWN_EMPTY",
+  items: "KNOWN_EMPTY",
+  historicalEvents: "KNOWN_EMPTY",
+  relationships: "KNOWN_EMPTY",
+};
+
+function asV2(
+  exchange: WorldExchangeV1,
+  collectionCoverage: WorldExchangeCollectionCoverage,
+): WorldExchangeV2 {
+  return { ...exchange, schemaVersion: 2, collectionCoverage };
+}
 
 describe("world exchange schema", () => {
   it("accepts a well-formed exchange", () => {
@@ -33,6 +55,72 @@ describe("world exchange schema", () => {
     const result = validateWorldExchange(exchange);
     expect(result.valid).toBe(true);
     if (result.valid) expect(result.value).toBe(exchange);
+  });
+
+  it("accepts v2 coverage for all four states and exposes legacy v1 as unknown", () => {
+    const v1 = emptyExchange();
+    expect(getWorldExchangeCollectionCoverage(v1, "people")).toBe(
+      "LEGACY_UNKNOWN",
+    );
+
+    const v2 = asV2(v1, {
+      ...allKnownEmptyCoverage,
+      people: "INCLUDED",
+      cities: "UNSUPPORTED",
+      locations: "NOT_INCLUDED",
+    });
+    v2.people.push({ id: "person-one" });
+
+    const result = validateWorldExchange(v2);
+    expect(result.valid).toBe(true);
+    expect(getWorldExchangeCollectionCoverage(v2, "people")).toBe("INCLUDED");
+    expect(getWorldExchangeCollectionCoverage(v2, "cities")).toBe(
+      "UNSUPPORTED",
+    );
+    expect(getWorldExchangeCollectionCoverage(v2, "locations")).toBe(
+      "NOT_INCLUDED",
+    );
+  });
+
+  it("rejects missing, unknown, and contradictory v2 coverage declarations", () => {
+    const missing = asV2(emptyExchange(), allKnownEmptyCoverage);
+    delete (
+      missing.collectionCoverage as Partial<WorldExchangeCollectionCoverage>
+    ).people;
+    const unknown = asV2(emptyExchange(), allKnownEmptyCoverage);
+    (unknown.collectionCoverage as Record<string, unknown>)["planets"] =
+      "UNSUPPORTED";
+    const contradictory = asV2(emptyExchange(), {
+      ...allKnownEmptyCoverage,
+      people: "INCLUDED",
+    });
+
+    for (const exchange of [missing, unknown, contradictory]) {
+      const result = validateWorldExchange(exchange);
+      expect(result.valid).toBe(false);
+      if (!result.valid)
+        expect(
+          result.issues.some((issue) =>
+            issue.path.startsWith("$.collectionCoverage"),
+          ),
+        ).toBe(true);
+    }
+  });
+
+  it("rejects v1 coverage metadata instead of changing legacy array meaning", () => {
+    const exchange = {
+      ...emptyExchange(),
+      collectionCoverage: allKnownEmptyCoverage,
+    };
+    const result = validateWorldExchange(exchange);
+    expect(result.valid).toBe(false);
+    if (!result.valid)
+      expect(result.issues).toContainEqual(
+        expect.objectContaining({
+          path: "$.collectionCoverage",
+          code: "unexpected-collection-coverage",
+        }),
+      );
   });
 
   it("accepts stable identities without optional display labels", () => {
@@ -85,7 +173,7 @@ describe("world exchange schema", () => {
 
   it("reports schema, duplicate ID, and dangling reference errors", () => {
     const exchange = emptyExchange();
-    (exchange as unknown as { schemaVersion: number }).schemaVersion = 2;
+    (exchange as unknown as { schemaVersion: number }).schemaVersion = 3;
     exchange.people.push({
       id: "same",
       name: "Ada",

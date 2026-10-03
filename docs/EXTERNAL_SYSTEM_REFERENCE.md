@@ -11,7 +11,7 @@ Simulation canonical facts (future, coordinated source)
       ↓
 approved read/projection adapter
       ↓
-World Exchange v1 / portable JSON
+World Exchange v1 or v2 / portable JSON
       ↓
 Web / Obsidian / CLI / other consumers
 ```
@@ -20,7 +20,7 @@ Simulation-External is separate from Simulation core and cannot redefine canonic
 
 ## Current structure
 
-- **Contract:** `world-schema` owns World Exchange v1 types and validation.
+- **Contract:** `world-schema` owns World Exchange v1/v2 types and validation.
 - **Core tooling:** `world-io` parses, validates, and serializes portable JSON.
 - **Adapter tooling:** `world-projection` is an External-only prototype; `world-markdown` is specialized Markdown/vault tooling.
 - **Supporting data:** `world-fixtures` provides demo/test data and is not required for portable-file consumers.
@@ -32,9 +32,11 @@ stability expectations, dependency rules, and the third-party consumer flow.
 
 ## World Exchange
 
-The current contract is schema version 1. Entity identity uses stable, non-empty IDs; references are explicit IDs and are validated against the exchange. World is a required scope object with a required ID; World and entity display names are optional and consumers provide fallbacks. Domain kinds/types, HistoricalEvent title/time, and Relationship endpoints/type remain required. Supported categories are World, Person, City, Location, Organization, Institution, Faction, Item, HistoricalEvent, and Relationship. Relationship endpoints may refer to any supported entity category. Runtime validation applies to fixtures and portable files. Fixtures and the External-only prototype remain the only implemented producer sources; no Simulation exporter contract exists.
+The current contracts are schema versions 1 and 2. Both use stable, non-empty IDs and explicit references validated within the exchange. World is a required scope object with a required ID; World and entity display names are optional and consumers provide fallbacks. Domain kinds/types, HistoricalEvent title/time, and Relationship endpoints/type remain required. V2 preserves the v1 entity shape and adds required coverage statuses for all nine entity collections: included, known empty, unsupported, or deliberately not included. Updated consumers treat v1 coverage as unknown and never infer completeness or factual zero from row counts. V2 whole-World completeness remains a producer assertion that schema validation cannot prove. Supported concepts are World, Person, City, Location, Organization, Institution, Faction, Item, HistoricalEvent, and Relationship. Relationship endpoints may refer to any supported entity category. Runtime validation applies to fixtures and portable files. Fixtures and the External-only prototype remain the only implemented producer sources; no Simulation exporter contract exists.
 
-See [World Exchange v1](WORLD_EXCHANGE.md) for field and compatibility rules.
+See [World Exchange](WORLD_EXCHANGE.md) for field and compatibility rules and
+[Collection Coverage](WORLD_EXCHANGE_COLLECTION_COVERAGE.md) for v2
+completeness semantics.
 See [Portable World Exchange](PORTABLE_WORLD_EXCHANGE.md) for JSON parsing,
 serialization, consumer loading, and artifact authority limits.
 
@@ -54,6 +56,8 @@ The Web Explorer provides world overview, global search, entity lists and detail
 
 **Stage D.3 implemented:** package layers and public workspace entry points are classified; reference apps are explicitly consumers; consumer-pressure and stability rules are documented; a minimal independent consumer is part of workspace validation.
 
+**Stage D.4 implemented:** World Exchange v2 declares whole-World collection coverage; v1 remains readable as legacy-unknown; fixture, portable I/O, projection prototype, Web empty states, and Obsidian safety tests exercise the External contract. This does not establish a Simulation source contract or authorize a real exporter.
+
 **Not implemented:** a real Simulation exporter or Simulation-owned source contract; live IPC; runtime mutation; P12 save consumption; Mod API; live bidirectional synchronization.
 
 ## Simulation dependency boundaries
@@ -64,7 +68,7 @@ Authorized Simulation source studies use the ignored local `.references/Simulati
 
 ## Current roadmap stage
 
-Stages A (schema and fixtures), B (Web Explorer), and C (Obsidian export/sync prototype) are implemented. Stage D has a corrected read-only projection study, an External-only fixture-backed boundary prototype, a completed Stage D.1 contract pressure review, implemented Stage D.2 portable World Exchange consumers, and implemented Stage D.3 platform surface. These stages do not supply Simulation-side World identity or a source contract, so no real exporter exists. Runtime exporter implementation requires explicit coordination and authorization. Stages E and F remain future work.
+Stages A (schema and fixtures), B (Web Explorer), and C (Obsidian export/sync prototype) are implemented. Stage D has a corrected read-only projection study, an External-only fixture-backed boundary prototype, a completed Stage D.1 contract pressure review, implemented Stage D.2 portable World Exchange consumers, implemented Stage D.3 platform surface, and implemented Stage D.4 collection coverage. Promoted WI-A supplies a stable typed `WorldId`, but these External stages do not establish an approved read-port exposure or World Exchange ID mapping, Simulation-side collection authorities, or a source contract; no real exporter exists. Runtime exporter implementation requires explicit coordination and authorization. Stages E and F remain future work.
 
 ## Validation
 

@@ -457,6 +457,16 @@ input:focus-visible {
 .load-error span {
   line-height: 1.5;
 }
+.coverage-notice {
+  margin: 0 26px 12px;
+  padding: 10px 14px;
+  border: 1px solid #d9ded0;
+  border-radius: 9px;
+  color: #687261;
+  background: #f1f3ec;
+  font-size: 11px;
+  line-height: 1.55;
+}
 .quiet-button {
   border: 0;
   padding: 6px 0;
@@ -1218,6 +1228,11 @@ input:focus-visible {
   color: #91968f;
   font-size: 11px;
   line-height: 1.6;
+}
+.collection-heading-row p.collection-coverage {
+  max-width: 510px;
+  margin-top: 5px;
+  color: #768071;
 }
 .collection-hero-icon {
   width: 55px;

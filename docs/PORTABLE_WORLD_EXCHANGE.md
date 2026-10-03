@@ -2,7 +2,7 @@
 
 ## Purpose and boundary
 
-Portable World Exchange makes a validated World Exchange v1 document usable
+Portable World Exchange makes validated World Exchange v1 and v2 documents usable
 outside the bundled fixture. It is an External-owned transport artifact for
 independent consumers. The current producer is still fixture/project data; no
 Simulation exporter or Simulation connection is implemented.
@@ -10,7 +10,7 @@ Simulation exporter or Simulation connection is implemented.
 ```text
 Simulation domain/runtime (future, coordinated exporter)
                     ↓
-             World Exchange v1
+             World Exchange v1 or v2
                     ↓
              `world-io` JSON
                     ↓
@@ -40,12 +40,13 @@ are separate architecture stages.
 - Encode files as UTF-8. The JSON root is the normal World Exchange document,
   including its existing `schemaVersion`; there is no storage envelope or
   second disk schema.
-- `world-io` supports the current v1 contract through `world-schema`. It
-  rejects unsupported versions. A future schema change must follow the
-  compatibility and versioning policy in [World Exchange v1](WORLD_EXCHANGE.md).
+- `world-io` supports v1 and v2 through `world-schema` and rejects unsupported
+  versions. V1 keeps its original array-only shape; v2 requires a valid
+  `collectionCoverage` map. A v1 reader must reject v2. See the compatibility
+  and versioning policy in [World Exchange](WORLD_EXCHANGE.md).
 - The required stable `world.id` is validated as supplied. The loader does not
-  synthesize it. `world.name` and entity display names remain optional under
-  the v1 rules.
+  synthesize it. `world.name` and entity display names remain optional in both
+  versions.
 - Parsing and serialization do not repair, rename, infer, or discard domain
   values. Schema validation reports invalid payloads and unresolved IDs.
 
@@ -71,7 +72,7 @@ silently repaired.
 Serialization sorts object keys recursively by key, preserves array order,
 uses two-space indentation, and appends one final line feed. Arrays are not
 sorted because their order may carry source or consumer meaning and there is
-no general domain-ordering rule established by v1. The serializer adds no
+no general domain-ordering rule established by the contract. The serializer adds no
 timestamps, IDs, labels, or consumer-specific transforms. Repeated
 serialization of the same logical value yields identical bytes; changing an
 array's order intentionally changes output. Parsing preserves stable ID values
@@ -110,8 +111,8 @@ the file itself does not establish their authority or freshness. Consumers
 must not infer Simulation truth from file names, display names, ordering, or
 presentation values. Actor-specific Knowledge, if a future exchange chooses
 to represent it, must remain explicitly actor-scoped and must never be
-promoted to factual world truth by this loader. V1 does not establish a
-Simulation Knowledge projection contract.
+promoted to factual world truth by this loader. Neither v1 nor v2 establishes
+a Simulation Knowledge projection contract.
 
 The portable artifact does not solve missing or unstable Simulation identity,
 source ownership, disputed domain authority, event-history provenance, or
@@ -125,26 +126,31 @@ Before a Simulation exporter is implemented, the integration must have:
 
 1. A reviewed Simulation-owned or Simulation-approved read-only source
    contract and named authorities for each exported fact.
-2. An approved, stable World identity source; the exporter may not fabricate
-   the required `world.id`.
-3. A field-level mapping from authoritative domain state to World Exchange v1,
-   including omission rules for unsupported, ambiguous, private, or
+2. An approved read-port exposure and World Exchange mapping for the stable
+   WI-A `WorldId`, plus compatibility rules for older or migrated Worlds that
+   lack that identity. The exporter may not fabricate the required `world.id`.
+3. A field-level mapping from authoritative domain state to the shared entity
+   shape, including omission rules for unsupported, ambiguous, private, or
    actor-specific data.
 4. An explicit distinction between present factual state, historical/event
    records, derived/presentation fields, and actor Knowledge.
 5. Stable ID mappings and reference-resolution rules that do not use names,
    filenames, array positions, Unity object identity, or persistence details.
-6. An agreed snapshot/read-consistency model and freshness/provenance policy
-   for an export operation.
-7. A compatibility and validation plan, representative conformance data, and
+6. Whole-World collection authorities and a compatible source-consistent
+   read boundary for every v2 collection marked `INCLUDED` or `KNOWN_EMPTY`.
+   Partial or unknown history cannot claim complete HistoricalEvent coverage.
+7. An agreed freshness/provenance policy for an export operation. V2 coverage
+   does not provide an as-of timestamp.
+8. A compatibility and validation plan, representative conformance data, and
    tests coordinated with Simulation architecture owners.
-8. A separately reviewed publication/transport decision. This file support
+9. A separately reviewed publication/transport decision. This file support
    does not authorize IPC, REST, sockets, live synchronization, runtime
    mutation, P12 snapshot consumption, or Mod API behavior.
 
 Open Simulation-side authority and mapping decisions remain integration
 questions; External must not fill gaps by inventing Simulation contracts.
 Before a real exporter can proceed, Simulation architecture owners must also
-resolve the World identity source, field-level authority/omission rules,
-historical event provenance, actor-Knowledge ownership, and export consistency
-model.
+approve how the read port exposes `WorldId`, resolve its External ID mapping
+and older-World compatibility, and settle field-level authority/omission
+rules, historical event provenance, actor-Knowledge ownership, and the export
+consistency model.

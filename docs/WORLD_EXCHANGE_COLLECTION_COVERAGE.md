@@ -1,8 +1,8 @@
-# World Exchange collection coverage — contract proposal
+# World Exchange collection coverage contract
 
-**Decision state:** independent design review passed; External implementation
-is pending. No producer/runtime integration is authorized or implemented by
-this document.
+**Implementation state:** Stage D.4 implements the External-owned schema,
+portable I/O, fixtures, prototype behavior, and consumer handling described
+here. No Simulation producer/runtime integration is authorized or implemented.
 
 ## Problem and contract ownership
 
@@ -79,12 +79,12 @@ Use a required top-level `collectionCoverage` object in schema version 2. Keep
 all nine entity arrays required. Each key names one array and has exactly one
 of these string values:
 
-| State | Required array shape | Consumer meaning |
-| --- | --- | --- |
-| `INCLUDED` | One or more entities | This producer supports the collection and supplies its complete known entity set for this artifact's scope. Consumers may treat the supplied entity set as authoritative at that artifact boundary. |
-| `KNOWN_EMPTY` | Empty array | The producer supports the collection and authoritatively knows there are zero entities in it at this artifact boundary. Consumers may conclude it is empty for this artifact. |
-| `UNSUPPORTED` | Empty array | This producer lacks the capability to provide the complete collection. Consumers must not infer that the world has none. |
-| `NOT_INCLUDED` | Empty array | A producer capable of providing the complete collection deliberately excludes it from this artifact. Consumers must not infer that the world has none. |
+| State          | Required array shape | Consumer meaning                                                                                                                                                                                    |
+| -------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `INCLUDED`     | One or more entities | This producer supports the collection and supplies its complete known entity set for this artifact's scope. Consumers may treat the supplied entity set as authoritative at that artifact boundary. |
+| `KNOWN_EMPTY`  | Empty array          | The producer supports the collection and authoritatively knows there are zero entities in it at this artifact boundary. Consumers may conclude it is empty for this artifact.                       |
+| `UNSUPPORTED`  | Empty array          | This producer lacks the capability to provide the complete collection. Consumers must not infer that the world has none.                                                                            |
+| `NOT_INCLUDED` | Empty array          | A producer capable of providing the complete collection deliberately excludes it from this artifact. Consumers must not infer that the world has none.                                              |
 
 Every map key is required exactly once. Missing keys, unknown keys, null,
 unknown status strings, and contradictory array/status pairs are invalid. In
@@ -105,16 +105,16 @@ timestamp or make a portable file current after it is produced.
 
 ### Alternatives considered
 
-| Shape | Assessment |
-| --- | --- |
-| Make arrays optional | Rejected. It still overloads absence and provides no portable distinction between unsupported and intentionally omitted. |
-| Add an optional coverage map to v1 | Rejected. Existing v1 readers can ignore it and continue reading `[]` as though it were empty; that does not safely change the meaning of the artifact for old consumers. It also makes missing coverage ambiguous for legacy documents. |
-| Wrap each array in a typed envelope | Rejected for this change. It changes every collection access and reference index shape, producing more schema and consumer churn than necessary. |
-| Required v2 `collectionCoverage` map beside the existing arrays | Proposed. It keeps entity data separate from metadata, is deterministic, validates the required states directly, and lets v1 retain its existing wire shape. |
+| Shape                                                           | Assessment                                                                                                                                                                                                                               |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Make arrays optional                                            | Rejected. It still overloads absence and provides no portable distinction between unsupported and intentionally omitted.                                                                                                                 |
+| Add an optional coverage map to v1                              | Rejected. Existing v1 readers can ignore it and continue reading `[]` as though it were empty; that does not safely change the meaning of the artifact for old consumers. It also makes missing coverage ambiguous for legacy documents. |
+| Wrap each array in a typed envelope                             | Rejected for this change. It changes every collection access and reference index shape, producing more schema and consumer churn than necessary.                                                                                         |
+| Required v2 `collectionCoverage` map beside the existing arrays | Adopted. It keeps entity data separate from metadata, is deterministic, validates the required states directly, and lets v1 retain its existing wire shape.                                                                              |
 
 ## Schema-version and legacy policy
 
-This proposal **requires schema-version evolution**. V1's required array shape
+This contract **requires schema-version evolution**. V1's required array shape
 has no completeness meaning strong enough to add safe optional coverage in
 place. V2 carries a required declaration; old readers that only support v1 must
 reject version 2 instead of silently interpreting a partial artifact as an
@@ -240,5 +240,5 @@ authorize placeholder entities.
    (for example source Faction properties not represented in the current
    contract)? They must not be tunneled through arbitrary metadata solely to
    avoid a separate domain review.
-5. Should v1 support ever be retired? This proposal preserves read support and
+5. Should v1 support ever be retired? This contract preserves read support and
    does not set a retirement date.

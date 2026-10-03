@@ -29,6 +29,10 @@ import {
   allEntities,
   asText,
   COLLECTIONS,
+  collectionCountLabel,
+  collectionCoverage,
+  collectionCoverageDescription,
+  collectionEmptyMessage,
   collectionEntries,
   collectionMeta,
   entityDescription,
@@ -318,17 +322,17 @@ function App() {
               <Clock3 size={17} />
               <span>Timeline</span>
               <span className="nav-count">
-                {collectionEntries(world, "historicalEvents").length}
+                {collectionCountLabel(world, "historicalEvents")}
               </span>
             </button>
             <div className="sidebar-rule" />
             <div className="sidebar-label nav-label-row">
-              <span>EXPLORE</span>
+              <span>ARTIFACT ROWS</span>
               <span className="sidebar-label-count">{entities.length}</span>
             </div>
             <nav aria-label="World entities" className="entity-nav">
               {COLLECTIONS.map((collection) => {
-                const count = collectionEntries(world, collection.key).length;
+                const count = collectionCountLabel(world, collection.key);
                 return (
                   <button
                     className={`nav-item ${view === collection.key ? "active" : ""}`}
@@ -449,6 +453,13 @@ function App() {
               <span>{loadError}</span>
             </div>
           )}
+          {world.schemaVersion === 1 && (
+            <div className="coverage-notice" role="note">
+              This World Exchange v1 artifact does not declare collection
+              coverage. Supplied rows are available, but completeness is
+              unknown.
+            </div>
+          )}
           <div className="content-scroll">
             {view === "overview" ? (
               <Overview
@@ -543,7 +554,7 @@ function Overview({
               <Globe2 size={14} /> Connected world
             </span>
             <span>
-              <Users size={14} /> {entries.length} connected entries
+              <Users size={14} /> {entries.length} rows in this artifact
             </span>
           </div>
         </div>
@@ -570,7 +581,7 @@ function Overview({
           >
             <span className={`stat-icon ${color}`}>{iconFor(icon, 17)}</span>
             <span className="stat-number">
-              {collectionEntries(exchange, key).length}
+              {collectionCountLabel(exchange, key)}
             </span>
             <span className="stat-label">{label.toLowerCase()}</span>
             <ArrowUpRight size={15} className="stat-arrow" />
@@ -620,7 +631,7 @@ function Overview({
               </button>
             ))}
             {!people.length && (
-              <EmptyLine text="No people have been added yet." />
+              <EmptyLine text={collectionEmptyMessage(exchange, "people")} />
             )}
           </div>
         </section>
@@ -661,7 +672,9 @@ function Overview({
               </button>
             ))}
             {!recentEvents.length && (
-              <EmptyLine text="No historical events are recorded yet." />
+              <EmptyLine
+                text={collectionEmptyMessage(exchange, "historicalEvents")}
+              />
             )}
           </div>
         </section>
@@ -703,7 +716,7 @@ function Overview({
             </button>
           ))}
           {!cities.length && (
-            <EmptyLine text="No cities have been added yet." />
+            <EmptyLine text={collectionEmptyMessage(exchange, "cities")} />
           )}
         </div>
       </section>
@@ -724,6 +737,7 @@ function CollectionView({
 }) {
   const meta = collectionMeta(collection);
   const entries = collectionEntries(exchange, collection);
+  const coverage = collectionCoverage(exchange, collection);
   const [filter, setFilter] = useState("");
   const visible = entries.filter(({ entity }) =>
     `${entityName(entity)} ${entityDescription(entity) ?? ""}`
@@ -739,8 +753,11 @@ function CollectionView({
           </div>
           <h1>{meta.label}</h1>
           <p>
-            Browse and connect the {meta.label.toLocaleLowerCase()} in{" "}
+            Browse the {meta.label.toLocaleLowerCase()} rows supplied for{" "}
             {worldName(exchange)}.
+          </p>
+          <p className="collection-coverage" role="note">
+            <strong>Coverage:</strong> {collectionCoverageDescription(coverage)}
           </p>
         </div>
         <span className={`collection-hero-icon ${meta.color}`}>
@@ -749,10 +766,12 @@ function CollectionView({
       </div>
       <div className="collection-controls">
         <span className="result-count">
-          <strong>{visible.length}</strong>{" "}
-          {visible.length === 1
-            ? meta.singular.toLocaleLowerCase()
-            : meta.label.toLocaleLowerCase()}
+          <strong>
+            {filter
+              ? visible.length
+              : collectionCountLabel(exchange, collection)}
+          </strong>{" "}
+          {filter ? "matching rows" : "rows supplied"}
         </span>
         <label className="filter-input">
           <Search size={15} />
@@ -783,12 +802,14 @@ function CollectionView({
           <strong>
             {filter
               ? "No matches found"
-              : `No ${meta.label.toLocaleLowerCase()} yet`}
+              : coverage === "KNOWN_EMPTY"
+                ? `No ${meta.label.toLocaleLowerCase()} in this World`
+                : `No ${meta.label.toLocaleLowerCase()} rows supplied`}
           </strong>
           <p>
             {filter
               ? "Try a different search term."
-              : "This directory is ready for its first entry."}
+              : collectionEmptyMessage(exchange, collection)}
           </p>
         </div>
       )}
@@ -855,6 +876,7 @@ function Timeline({
   onSelect: (entry: EntityEntry) => void;
 }) {
   const [direction, setDirection] = useState<"oldest" | "newest">("oldest");
+  const coverage = collectionCoverage(exchange, "historicalEvents");
   const ordered = direction === "oldest" ? events : [...events].reverse();
   return (
     <div className="timeline-page">
@@ -864,7 +886,13 @@ function Timeline({
             <span className="eyebrow-line" /> THE STORY SO FAR
           </div>
           <h1>Timeline</h1>
-          <p>Explore the moments that shaped {worldName(exchange)}.</p>
+          <p>
+            Explore the historical event rows supplied for {worldName(exchange)}
+            .
+          </p>
+          <p className="collection-coverage" role="note">
+            <strong>Coverage:</strong> {collectionCoverageDescription(coverage)}
+          </p>
         </div>
         <span className="collection-hero-icon pink">
           <Clock3 size={24} />
@@ -872,7 +900,8 @@ function Timeline({
       </div>
       <div className="timeline-tools">
         <span>
-          <strong>{events.length}</strong> recorded events
+          <strong>{collectionCountLabel(exchange, "historicalEvents")}</strong>{" "}
+          event rows supplied
         </span>
         <button
           className="quiet-button"
@@ -921,10 +950,12 @@ function Timeline({
           <span>
             <Clock3 size={23} />
           </span>
-          <strong>No history recorded yet</strong>
-          <p>
-            Historical events will appear here as they are added to the world.
-          </p>
+          <strong>
+            {coverage === "KNOWN_EMPTY"
+              ? "No history in this World"
+              : "No history rows supplied"}
+          </strong>
+          <p>{collectionEmptyMessage(exchange, "historicalEvents")}</p>
         </div>
       )}
     </div>

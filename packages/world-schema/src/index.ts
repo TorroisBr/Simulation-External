@@ -105,9 +105,26 @@ export interface Relationship extends BaseEntity {
   sinceYear?: number;
 }
 
-/** A portable, world-scoped read projection with ID-based references. */
-export interface WorldExchange {
-  schemaVersion: 1;
+export type WorldExchangeCollectionName =
+  | "people"
+  | "cities"
+  | "locations"
+  | "organizations"
+  | "institutions"
+  | "factions"
+  | "items"
+  | "historicalEvents"
+  | "relationships";
+
+export type WorldExchangeCollectionCoverageStatus =
+  "INCLUDED" | "KNOWN_EMPTY" | "UNSUPPORTED" | "NOT_INCLUDED";
+
+export type WorldExchangeCollectionCoverage = Record<
+  WorldExchangeCollectionName,
+  WorldExchangeCollectionCoverageStatus
+>;
+
+interface WorldExchangeCollections {
   world: WorldMetadata;
   people: Person[];
   cities: City[];
@@ -119,6 +136,21 @@ export interface WorldExchange {
   historicalEvents: HistoricalEvent[];
   relationships: Relationship[];
 }
+
+/** A portable, world-scoped read projection with ID-based references. */
+export interface WorldExchangeV1 extends WorldExchangeCollections {
+  schemaVersion: 1;
+}
+
+/** V2 makes whole-World collection coverage explicit for every array. */
+export interface WorldExchangeV2 extends WorldExchangeCollections {
+  schemaVersion: 2;
+  collectionCoverage: WorldExchangeCollectionCoverage;
+}
+
+export type WorldExchange = WorldExchangeV1 | WorldExchangeV2;
+export type EffectiveCollectionCoverage =
+  WorldExchangeCollectionCoverageStatus | "LEGACY_UNKNOWN";
 
 export type WorldEntity =
   | WorldMetadata
@@ -158,7 +190,7 @@ export interface WorldExchangeIndex {
   relationshipsByEntityId: ReadonlyMap<string, readonly Relationship[]>;
 }
 
-type CollectionName = Exclude<keyof WorldExchange, "schemaVersion" | "world">;
+type CollectionName = WorldExchangeCollectionName;
 type RefCollection = CollectionName | "*";
 
 interface EntityDefinition {
@@ -170,7 +202,7 @@ interface EntityDefinition {
   arrayRefs?: Record<string, RefCollection>;
 }
 
-const collectionNames: CollectionName[] = [
+export const WORLD_EXCHANGE_COLLECTIONS: readonly CollectionName[] = [
   "people",
   "cities",
   "locations",
@@ -181,6 +213,8 @@ const collectionNames: CollectionName[] = [
   "historicalEvents",
   "relationships",
 ];
+
+const collectionNames: CollectionName[] = [...WORLD_EXCHANGE_COLLECTIONS];
 
 const definitions: Record<CollectionName, EntityDefinition> = {
   people: {
@@ -321,11 +355,22 @@ export function validateWorldExchange(input: unknown): ValidationResult {
     };
   }
 
-  if (input["schemaVersion"] !== 1) {
+  if (input["schemaVersion"] !== 1 && input["schemaVersion"] !== 2) {
     issues.push({
       path: "$.schemaVersion",
       code: "unsupported-schema-version",
-      message: "schemaVersion must be 1.",
+      message: "schemaVersion must be 1 or 2.",
+    });
+  }
+
+  if (
+    input["schemaVersion"] === 1 &&
+    Object.prototype.hasOwnProperty.call(input, "collectionCoverage")
+  ) {
+    issues.push({
+      path: "$.collectionCoverage",
+      code: "unexpected-collection-coverage",
+      message: "collectionCoverage is only valid when schemaVersion is 2.",
     });
   }
 
@@ -413,6 +458,14 @@ export function validateWorldExchange(input: unknown): ValidationResult {
     });
   }
 
+  if (input["schemaVersion"] === 2) {
+    validateCollectionCoverage(
+      input["collectionCoverage"],
+      entitiesByCollection,
+      issues,
+    );
+  }
+
   for (const reference of references) {
     if (reference.targetCollection === "*") {
       if (!knownIds.has(reference.id)) {
@@ -454,6 +507,84 @@ export function validateWorldExchange(input: unknown): ValidationResult {
       knownIds.set(id, path);
     }
   }
+}
+
+function validateCollectionCoverage(
+  input: unknown,
+  entitiesByCollection: ReadonlyMap<CollectionName, unknown[]>,
+  issues: ValidationIssue[],
+): void {
+  if (!isRecord(input)) {
+    issues.push({
+      path: "$.collectionCoverage",
+      code: "invalid-type",
+      message: "Expected a collection coverage object in schema version 2.",
+    });
+    return;
+  }
+
+  for (const key of Object.keys(input)) {
+    if (!collectionNames.includes(key as CollectionName)) {
+      issues.push({
+        path: `$.collectionCoverage.${key}`,
+        code: "unknown-collection",
+        message: `Unknown collection coverage key "${key}".`,
+      });
+    }
+  }
+
+  for (const collection of collectionNames) {
+    const path = `$.collectionCoverage.${collection}`;
+    const status = input[collection];
+    if (status === undefined) {
+      issues.push({
+        path,
+        code: "missing-collection-coverage",
+        message: "Every World Exchange collection requires a coverage status.",
+      });
+      continue;
+    }
+    if (
+      status !== "INCLUDED" &&
+      status !== "KNOWN_EMPTY" &&
+      status !== "UNSUPPORTED" &&
+      status !== "NOT_INCLUDED"
+    ) {
+      issues.push({
+        path,
+        code: "invalid-collection-coverage",
+        message:
+          "Expected INCLUDED, KNOWN_EMPTY, UNSUPPORTED, or NOT_INCLUDED.",
+      });
+      continue;
+    }
+
+    const entities = entitiesByCollection.get(collection) ?? [];
+    const hasEntities = entities.length > 0;
+    const consistent =
+      (status === "INCLUDED" && hasEntities) ||
+      (status !== "INCLUDED" && !hasEntities);
+    if (!consistent) {
+      issues.push({
+        path,
+        code: "contradictory-collection-coverage",
+        message:
+          status === "INCLUDED"
+            ? "INCLUDED requires one or more entities in the collection."
+            : `${status} requires an empty collection array.`,
+      });
+    }
+  }
+}
+
+/** Return the declared status, or LEGACY_UNKNOWN for an unannotated v1 array. */
+export function getWorldExchangeCollectionCoverage(
+  exchange: WorldExchange,
+  collection: WorldExchangeCollectionName,
+): EffectiveCollectionCoverage {
+  return exchange.schemaVersion === 2
+    ? exchange.collectionCoverage[collection]
+    : "LEGACY_UNKNOWN";
 }
 
 function validateEntity(

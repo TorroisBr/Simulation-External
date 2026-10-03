@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { worldFixture } from "@simulation-external/world-fixtures";
+import {
+  collectionCoverageFixture,
+  worldFixture,
+} from "@simulation-external/world-fixtures";
 import { renderWorldMarkdownNotes } from "@simulation-external/world-markdown";
 import { serializeWorldExchange } from "@simulation-external/world-io";
 import { syncWorldExchangeFile } from "../src/world-import.js";
@@ -67,6 +70,28 @@ describe("Obsidian portable World Exchange import", () => {
     expect(vault.files.get(personNote.path)).toContain(
       "Keep this GM-authored note.",
     );
+  });
+
+  it("creates no placeholder notes for absent collections and leaves authored files alone", async () => {
+    const authoredPath = "Locations/Personal field notes.md";
+    const authoredText = "Notes about places I have not imported yet.";
+    const vault = memoryVault(new Map([[authoredPath, authoredText]]));
+    const json = serializeWorldExchange(collectionCoverageFixture);
+
+    const result = await syncWorldExchangeFile(json, vault.adapter);
+    const generatedPaths = renderWorldMarkdownNotes(
+      collectionCoverageFixture,
+    ).map(({ path }) => path);
+
+    expect(result.created).toEqual(generatedPaths);
+    expect(vault.files.get(authoredPath)).toBe(authoredText);
+    expect(vault.writes).not.toContain(authoredPath);
+    expect(generatedPaths.some((path) => path.startsWith("Locations/"))).toBe(
+      false,
+    );
+    expect(
+      generatedPaths.some((path) => path.startsWith("Organizations/")),
+    ).toBe(false);
   });
 
   it("rejects conflicting stable identity metadata without writing notes", async () => {

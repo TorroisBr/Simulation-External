@@ -1,10 +1,23 @@
 import {
   validateWorldExchange,
   type WorldExchange,
+  type WorldExchangeV1,
+  type WorldExchangeV2,
 } from "@simulation-external/world-schema";
 
 const candidateWorldFixture: WorldExchange = {
-  schemaVersion: 1,
+  schemaVersion: 2,
+  collectionCoverage: {
+    people: "INCLUDED",
+    cities: "INCLUDED",
+    locations: "INCLUDED",
+    organizations: "INCLUDED",
+    institutions: "INCLUDED",
+    factions: "INCLUDED",
+    items: "INCLUDED",
+    historicalEvents: "INCLUDED",
+    relationships: "INCLUDED",
+  },
   world: {
     id: "world-lyr",
     name: "The Lyran Reach",
@@ -521,9 +534,63 @@ if (!validation.valid) {
     `Invalid built-in world fixture: ${validation.issues.map((issue) => `${issue.path} (${issue.code})`).join(", ")}`,
   );
 }
+if (validation.value.schemaVersion !== 2) {
+  throw new Error("The built-in world fixture must use World Exchange v2.");
+}
 
 /** The ready-to-use fixture, validated by @simulation-external/world-schema. */
 export const worldFixture = validation.value;
 
 /** Alias emphasizing that this value passed runtime validation. */
 export const validatedWorldFixture = worldFixture;
+
+const { collectionCoverage: _coverage, ...legacyFixtureFields } = worldFixture;
+void _coverage;
+
+/** V1 compatibility fixture; its array completeness is intentionally unknown. */
+export const legacyWorldFixture: WorldExchangeV1 = {
+  ...legacyFixtureFields,
+  schemaVersion: 1,
+};
+
+/** Demonstrates empty, unsupported, and deliberately omitted v2 collections. */
+const candidateCollectionCoverageFixture: WorldExchangeV2 = {
+  schemaVersion: 2,
+  world: { id: "world-coverage-example", name: "Coverage Example" },
+  people: [{ id: "person-coverage-example", name: "Example Person" }],
+  cities: [],
+  locations: [],
+  organizations: [],
+  institutions: [],
+  factions: [],
+  items: [],
+  historicalEvents: [],
+  relationships: [],
+  collectionCoverage: {
+    people: "INCLUDED",
+    cities: "KNOWN_EMPTY",
+    locations: "UNSUPPORTED",
+    organizations: "NOT_INCLUDED",
+    institutions: "KNOWN_EMPTY",
+    factions: "KNOWN_EMPTY",
+    items: "UNSUPPORTED",
+    historicalEvents: "NOT_INCLUDED",
+    relationships: "KNOWN_EMPTY",
+  },
+};
+
+const collectionCoverageValidation = validateWorldExchange(
+  candidateCollectionCoverageFixture,
+);
+if (!collectionCoverageValidation.valid) {
+  throw new Error(
+    `Invalid collection coverage fixture: ${collectionCoverageValidation.issues.map((issue) => `${issue.path} (${issue.code})`).join(", ")}`,
+  );
+}
+if (collectionCoverageValidation.value.schemaVersion !== 2) {
+  throw new Error(
+    "The collection coverage fixture must use World Exchange v2.",
+  );
+}
+
+export const collectionCoverageFixture = collectionCoverageValidation.value;

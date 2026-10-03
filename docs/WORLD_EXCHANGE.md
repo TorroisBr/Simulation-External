@@ -1,20 +1,20 @@
-# World Exchange v1
+# World Exchange v1 and v2
 
 ## Purpose and philosophy
 
-World Exchange is a renderer-agnostic, read-oriented projection for external tools. V1 was first proven with fixtures and can now be carried as a portable JSON artifact; it is not a save format or runtime snapshot. It must not expose Unity objects, runtime classes, internal Stores, persistence receipts, mutation epochs, hydration details, or continuation state.
+World Exchange is a renderer-agnostic, read-oriented projection for external tools. V1 was first proven with fixtures and can now be carried as a portable JSON artifact; v2 adds collection-coverage declarations while retaining the same entity collections. Neither version is a save format or runtime snapshot. The contract must not expose Unity objects, runtime classes, internal Stores, persistence receipts, mutation epochs, hydration details, or continuation state.
 
 ## Versioning and compatibility
 
-Every payload carries `schemaVersion: 1`. Changes that preserve the meaning of existing fields may be additive and optional; changes that alter meanings or required structure need a new schema version and a deliberate migration or coexistence strategy. Consumers should reject unsupported major versions and should not assume that optional fields are present. Validation belongs in `world-schema` and runs at runtime for fixture/import boundaries.
+Every payload carries `schemaVersion: 1` or `schemaVersion: 2`. V1 retains its original array-only shape. V2 requires the `collectionCoverage` object described below; old v1 readers must reject v2 rather than ignore its completeness semantics. Updated readers may accept both versions. Changes that alter field meanings or required structure need a new schema version and a deliberate migration or coexistence strategy. Consumers should reject unsupported versions and should not assume optional entity fields are present. Validation belongs in `world-schema` and runs at runtime for fixture/import boundaries.
 
 ## IDs and references
 
 Every entity has a stable, non-empty string `id`, unique within one world payload. Relationships use IDs rather than embedding complete entity objects. A file name, display name, array position, or renderer-specific URL is never an identity. World metadata is a required scope object with a stable `id`; its `name` is optional presentation metadata. Entity `name` labels are also optional and, when present, must be non-empty. Consumers provide an ID-based or generic display fallback rather than writing a generated label back into the exchange. Reference validation reports IDs that do not resolve in the payload. Public `metadata`, when present, contains only documented external values and must not become a tunnel for internal runtime state.
 
-## V1 shape
+## V1 entity shape
 
-A payload contains schema version, required World scope metadata, and collections for people, cities, locations, organizations, institutions, factions, items, historical events, and relationships. World metadata has a stable ID and may include a display name, era, description, tags, and JSON metadata. Every entity has a stable ID and may include tags and JSON metadata. Person, City, Location, Organization, Institution, Faction, and Item have optional display names. Location also requires a `kind`; Organization, Institution, and Item require a `type`. HistoricalEvent requires a `title` and a time value. Relationship requires source/target IDs and a type. These domain fields remain separate from optional presentation labels.
+A v1 payload contains schema version, required World scope metadata, and collections for people, cities, locations, organizations, institutions, factions, items, historical events, and relationships. V2 keeps these entity fields and required arrays unchanged, then adds collection coverage. World metadata has a stable ID and may include a display name, era, description, tags, and JSON metadata. Every entity has a stable ID and may include tags and JSON metadata. Person, City, Location, Organization, Institution, Faction, and Item have optional display names. Location also requires a `kind`; Organization, Institution, and Item require a `type`. HistoricalEvent requires a `title` and a time value. Relationship requires source/target IDs and a type. These domain fields remain separate from optional presentation labels.
 
 V1 supports:
 
@@ -29,9 +29,44 @@ V1 supports:
 
 See exported TypeScript contracts for exact optionality and validation behavior.
 
+## V2 collection coverage
+
+V2 requires a top-level `collectionCoverage` map with exactly one status for
+each of the nine entity arrays. The map describes the producer's assertion
+about the entire World identified by `world.id`, not a cohort, query, actor
+view, or selected history window.
+
+| Status         | Array requirement | Meaning                                                                                                                    |
+| -------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `INCLUDED`     | Non-empty         | The producer supports and includes the complete known collection for this World.                                           |
+| `KNOWN_EMPTY`  | Empty             | The producer supports the collection and confirms that it has no entities in this World.                                   |
+| `UNSUPPORTED`  | Empty             | The producer lacks full-collection capability; consumers cannot infer that the World has none.                             |
+| `NOT_INCLUDED` | Empty             | A capable producer deliberately omitted the collection from this artifact; consumers cannot infer that the World has none. |
+
+The schema rejects missing/unknown statuses and contradictions between a
+status and its array. A subset cannot be marked `INCLUDED`; a failed,
+unavailable, or inconsistent read blocks export and is not `NOT_INCLUDED`.
+Validation checks structure, not whether the producer truly has authority or
+complete enumeration. Included collections and their references must come
+from one compatible source-consistent read boundary for the same World.
+
+`HistoricalEvent` coverage refers to the complete history recognized by an
+approved whole-World history authority. V2 has no history window or retention
+field, so a partial or unknown history horizon cannot be `INCLUDED` or
+`KNOWN_EMPTY`.
+
+An updated consumer treats every v1 collection as `LEGACY_UNKNOWN`, even when
+the array has rows. V1 rows remain available, but v1 never proves completeness;
+an empty v1 array is not `KNOWN_EMPTY`. Consumers must not infer v2 coverage
+from array lengths, and serializers preserve the input version. See
+[Collection Coverage](WORLD_EXCHANGE_COLLECTION_COVERAGE.md) for the complete
+contract rationale, migration policy, source-authority pressure, and exporter
+prerequisites.
+
 ## Portable JSON artifacts
 
 The `world-io` package reads and writes normal UTF-8 JSON World Exchange v1
+and v2
 documents using the `*.world.json` convention. It delegates entity validation
 to this schema, rejects malformed or unsupported input without repair, and
 does not generate missing identity or labels. Serialization sorts object keys

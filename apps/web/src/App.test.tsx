@@ -8,7 +8,11 @@ import {
   within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import { worldFixture } from "@simulation-external/world-fixtures";
+import {
+  collectionCoverageFixture,
+  legacyWorldFixture,
+  worldFixture,
+} from "@simulation-external/world-fixtures";
 import { serializeWorldExchange } from "@simulation-external/world-io";
 import App from "./App";
 
@@ -102,5 +106,74 @@ describe("World Explorer navigation", () => {
       screen.getByRole("heading", { name: /Welcome to The Lyran Reach/ }),
     ).toBeTruthy();
     expect(screen.getByText("FIXTURE")).toBeTruthy();
+  });
+
+  it("shows unsupported and deliberately omitted v2 collections without zero claims", async () => {
+    render(<App />);
+    await chooseFile(
+      createFile(
+        "coverage.world.json",
+        serializeWorldExchange(collectionCoverageFixture),
+      ),
+    );
+
+    const entityNav = within(
+      screen.getByRole("navigation", { name: "World entities" }),
+    );
+    expect(
+      entityNav.getByRole("button", { name: /Locations/ }).textContent,
+    ).toContain("—");
+    fireEvent.click(entityNav.getByRole("button", { name: /Locations/ }));
+    expect(
+      screen.getByText(
+        "This producer cannot provide the collection; its absence does not mean the World has none.",
+      ),
+    ).toBeTruthy();
+
+    fireEvent.click(entityNav.getByRole("button", { name: /Organizations/ }));
+    expect(
+      screen.getByText(
+        "This artifact deliberately omits the collection; its absence does not mean the World has none.",
+      ),
+    ).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /Timeline/ }));
+    expect(
+      screen.getByText(
+        "This artifact deliberately omits the collection; its absence does not mean the World has none.",
+      ),
+    ).toBeTruthy();
+  });
+
+  it("keeps empty v1 collections explicitly unknown", async () => {
+    const legacy = structuredClone(legacyWorldFixture);
+    legacy.people = [];
+    legacy.cities = [];
+    legacy.locations = [];
+    legacy.organizations = [];
+    legacy.institutions = [];
+    legacy.factions = [];
+    legacy.items = [];
+    legacy.historicalEvents = [];
+    legacy.relationships = [];
+    render(<App />);
+    await chooseFile(
+      createFile("legacy.world.json", serializeWorldExchange(legacy)),
+    );
+
+    expect(document.querySelector(".coverage-notice")?.textContent).toContain(
+      "does not declare collection coverage",
+    );
+    const entityNav = within(
+      screen.getByRole("navigation", { name: "World entities" }),
+    );
+    expect(
+      entityNav.getByRole("button", { name: /People/ }).textContent,
+    ).toContain("—");
+    fireEvent.click(entityNav.getByRole("button", { name: /People/ }));
+    expect(
+      screen.getByText(
+        /an empty list does not confirm that the World has none/,
+      ),
+    ).toBeTruthy();
   });
 });

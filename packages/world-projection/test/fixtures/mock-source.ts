@@ -30,6 +30,17 @@ export interface ConsumerCompatibilityMock extends ProjectionSource {
 export function createCanonicalCapabilityMock(): CanonicalCapabilityMock {
   return {
     readWorldIdentity: () => undefined,
+    readCollectionCoverage: () => ({
+      people: "INCLUDED",
+      cities: "INCLUDED",
+      locations: "INCLUDED",
+      organizations: "UNSUPPORTED",
+      institutions: "INCLUDED",
+      factions: "INCLUDED",
+      items: "UNSUPPORTED",
+      historicalEvents: "UNSUPPORTED",
+      relationships: "UNSUPPORTED",
+    }),
     readPeople: () => [
       {
         sourceId: "person:unnamed-record",
@@ -135,6 +146,17 @@ export function createConsumerCompatibilityMock(
       ...(includeWorldName
         ? { name: "Projection Consumer Check Fixture" }
         : {}),
+    }),
+    readCollectionCoverage: () => ({
+      people: "INCLUDED",
+      cities: "INCLUDED",
+      locations: "INCLUDED",
+      organizations: "UNSUPPORTED",
+      institutions: "KNOWN_EMPTY",
+      factions: "INCLUDED",
+      items: "UNSUPPORTED",
+      historicalEvents: "UNSUPPORTED",
+      relationships: "UNSUPPORTED",
     }),
     readPeople: () => (options.reverseRows ? [...people].reverse() : people),
     readCities: () => (options.reverseRows ? [...cities].reverse() : cities),

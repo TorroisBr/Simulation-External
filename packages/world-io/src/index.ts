@@ -41,7 +41,7 @@ export function validateWorldExchange(input: unknown): ValidationResult {
 
 /**
  * Decode UTF-8 JSON bytes or parse an already-decoded JSON string, then apply
- * the canonical World Exchange v1 validation without repairing the document.
+ * the canonical World Exchange v1/v2 validation without repairing the document.
  */
 export function parseWorldExchange(
   input: string | Uint8Array | ArrayBuffer,

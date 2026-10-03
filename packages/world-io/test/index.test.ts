@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { worldFixture } from "@simulation-external/world-fixtures";
+import {
+  legacyWorldFixture,
+  worldFixture,
+} from "@simulation-external/world-fixtures";
 import {
   parseWorldExchange,
   serializeWorldExchange,
@@ -30,7 +33,7 @@ describe("portable World Exchange I/O", () => {
   });
 
   it("delegates unsupported schema versions and missing World IDs to schema validation", () => {
-    const unsupported = { ...structuredClone(worldFixture), schemaVersion: 2 };
+    const unsupported = { ...structuredClone(worldFixture), schemaVersion: 3 };
     expect(() => parseWorldExchange(JSON.stringify(unsupported))).toThrow(
       /unsupported-schema-version/,
     );
@@ -40,6 +43,20 @@ describe("portable World Exchange I/O", () => {
     expect(() => parseWorldExchange(JSON.stringify(missingWorldId))).toThrow(
       /\$\.world\.id/,
     );
+  });
+
+  it("preserves legacy v1 and declared v2 coverage without upgrades", () => {
+    const legacy = parseWorldExchange(
+      serializeWorldExchange(legacyWorldFixture),
+    );
+    expect(legacy.schemaVersion).toBe(1);
+    expect("collectionCoverage" in legacy).toBe(false);
+
+    const v2 = parseWorldExchange(serializeWorldExchange(worldFixture));
+    expect(v2.schemaVersion).toBe(2);
+    if (v2.schemaVersion !== 2)
+      throw new Error("Expected the fixture to parse as World Exchange v2");
+    expect(v2.collectionCoverage).toEqual(worldFixture.collectionCoverage);
   });
 
   it("rejects blank optional labels, duplicate IDs, and broken references", () => {

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Portable JSON parsing and deterministic serialization for World Exchange v1.",
+  "description": "Portable JSON parsing and deterministic serialization for World Exchange v1 and v2.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
